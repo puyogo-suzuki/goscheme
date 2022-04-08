@@ -23,7 +23,7 @@ string_new_deep2(string_t * outstring, char * buf) {
     return string_new_deep(outstring, buf, strlen(buf));
 }
 
-bool string_copy(string_t * dst, string_t * src){
+bool string_copy(string_t * restrict dst, string_t * restrict src){
     *dst = (string_t){(char *)malloc(sizeof(char) * (src->length + 1)), src->length};
     if (dst->buffer == NULL) return false;
     strncpy(dst->buffer, src->buffer, src->length + 1);
@@ -36,7 +36,7 @@ string_substring_shallow(string_t * outstring, string_t * src, int start, int le
 }
 
 bool
-string_substring_deep(string_t * outstring, string_t * src, int start, int length) {
+string_substring_deep(string_t * restrict outstring, string_t * restrict src, int start, int length) {
     if(src->length < start + length) return false;
     return string_new_deep(outstring, &(src->buffer[start]), length);
 }
