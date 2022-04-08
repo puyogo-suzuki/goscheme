@@ -1,14 +1,19 @@
-CFLAGS=-I. -g -Wall -Werror
-INCS=token.h string_t.h
-OBJS=main.o token.o string_t.o
+CFLAGS=-g -Wall -Werror
+INC=./inc
+SRCS=$(wildcard src/*.c)
+SRCS2=$(addprefix src/,$(SRCS))
+OBJS=$(addprefix obj/,$(notdir $(SRCS:.c=.o)))
 LIBS=
-TARGET=main
+TARGET=gs.out
 
-%.o: %.c $(INCS)
-	$(CC) $(CFLAGS) -c -o $@ $<
+all: $(TARGET)
+
+obj/%.o: src/%.c
+	mkdir -p obj
+	$(CC) $(CFLAGS) -c -I $(INC) -o $@ $<
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) -I $(INC) -o $@ $^
 
 clean:
-	rm -rf $(TARGET) *.o
+	rm -rf $(TARGET) obj/*.o
