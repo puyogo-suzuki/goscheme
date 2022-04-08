@@ -6,7 +6,7 @@ int main(void) {
     tokenizer_t t = tokenizer_new(str);
     token_t ot;
     while(tokenizer_next(&t, &ot)) {
-        printf("%d ", ot.tokenKind);
+        printf("%d %d ", t.position, ot.tokenKind);
         if (ot.value.strValue.buffer == NULL) {
             putchar('\n');
             continue;

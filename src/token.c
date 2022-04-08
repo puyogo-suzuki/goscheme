@@ -26,7 +26,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
     }
 
 L_BREAK_WHILE:
-    startPos = self->position - 1;
+    startPos = self->position;
     bool isString = self->str.buffer[self->position] == '"';
     bool isNum = isNumChar(self->str.buffer[self->position]);
     self->position++;
@@ -34,8 +34,8 @@ L_BREAK_WHILE:
     while(self->position < self->str.length) {
         char cur = self->str.buffer[self->position];
         switch(cur) {
-            case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
-            case '"': if(isString) goto L_OTHER; else goto L_FAIL;
+        case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
+        case '"': if (isString) { self->position++; goto L_OTHER; } else goto L_FAIL;
             default: if(isNum && !isNumChar(cur)) goto L_FAIL; else break;
         }
         self->position++;
@@ -63,15 +63,14 @@ L_OTHER:
     string_substring_shallow(&subview, &self->str, startPos, self->position - startPos);
     if(isNum) {
         out_token->tokenKind = TOKEN_NUMERIC;
-        string_copy(&subview, &out_token->value.strValue);
+        string_copy(&out_token->value.strValue, &subview);
     } else  if(isString) {
         out_token->tokenKind = TOKEN_STRING;
-        string_substring_deep(&subview, &out_token->value.strValue, 1, subview.length - 2);
+        string_substring_deep(&out_token->value.strValue, &subview, 1, subview.length - 2);
     } else {
         out_token->tokenKind = TOKEN_SYMBOL;
-        string_copy(&subview, &out_token->value.strValue);
+        string_copy(&out_token->value.strValue, &subview);
     }
-    self->position++;
     return true;
 L_FAIL:
     self->position++;
