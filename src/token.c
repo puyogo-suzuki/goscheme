@@ -5,7 +5,8 @@ tokenizer_new(string_t str) {
     return (tokenizer_t){ 0, str };
 }
 
-bool isNumChar(char ch) {
+bool
+isNumChar(char ch) {
     return ch >= '0' && ch <= '9';
 }
 
@@ -23,9 +24,9 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
             default: goto L_BREAK_WHILE;
         }
         self->position++;
-    }
+    } L_BREAK_WHILE:
 
-L_BREAK_WHILE:
+
     startPos = self->position;
     bool isString = self->str.buffer[self->position] == '"';
     bool isNum = isNumChar(self->str.buffer[self->position]);
@@ -34,8 +35,8 @@ L_BREAK_WHILE:
     while(self->position < self->str.length) {
         char cur = self->str.buffer[self->position];
         switch(cur) {
-        case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
-        case '"': if (isString) { self->position++; goto L_OTHER; } else goto L_FAIL;
+            case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
+            case '"': if (isString) { self->position++; goto L_OTHER; } else goto L_FAIL;
             default: if(isNum && !isNumChar(cur)) goto L_FAIL; else break;
         }
         self->position++;
