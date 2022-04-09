@@ -30,11 +30,20 @@
     <ClCompile Include="inc\parse.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\scheme_object_t.c">
+    <ClCompile Include="src\schemeObject_t.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\io.c">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\list.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\winbsdfunc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\common.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,13 +53,16 @@
     <ClInclude Include="inc\token.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="inc\scheme_object_t.h">
+    <ClInclude Include="inc\schemeObject_t.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="inc\winbsdfunc.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="inc\io.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\list.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

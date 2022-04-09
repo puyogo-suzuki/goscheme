@@ -44,7 +44,7 @@ string_new_deep2(string_t * outstring, char * buf) {
 }
 
 bool
-string_copy(string_t * restrict dst, string_t * restrict src){
+string_copy(string_t * dst, string_t * src){
     return string_new_deep(dst, src->buffer, src->length);
 }
 
@@ -55,7 +55,7 @@ string_substring_shallow(string_t * outstring, string_t * src, size_t start, siz
 }
 
 bool
-string_substring_deep(string_t * restrict outstring, const string_t * restrict src, size_t start, size_t length) {
+string_substring_deep(string_t * outstring, const string_t * src, size_t start, size_t length) {
     if(src->length < start + length) return false;
     return string_new_deep(outstring, &(src->buffer[start]), length);
 }
@@ -68,7 +68,7 @@ string_getAt(string_t * s, size_t index, char * outch) {
 }
 
 bool
-string_overWrite(string_t * restrict dst, const string_t * restrict src, size_t start) {
+string_overWrite(string_t * dst, const string_t * src, size_t start) {
     if (start + src->length > dst->length) {
         char * buf = (char *)reallocarray(dst->buffer, start + src->length, sizeof(char));
         if (buf == NULL) return false;
@@ -101,7 +101,9 @@ string_parseInt(string_t * s, int32_t * outi) {
 void
 string_default(string_t * s) {
     s->buffer = NULL;
+#if _DEBUG
     s->isShallow = false;
+#endif
     s->length = 0;
 }
 
