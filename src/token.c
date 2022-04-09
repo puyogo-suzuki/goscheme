@@ -1,4 +1,5 @@
 #include "token.h"
+#include <stdio.h>
 
 tokenizer_t
 tokenizer_new(string_t str) {
@@ -12,15 +13,15 @@ isNumChar(char ch) {
 
 bool
 tokenizer_next(tokenizer_t * self, token_t * out_token) {
-    int32_t startPos;
+    size_t startPos;
     string_t subview;
+    char cur = '\0';
     while(true) {
-        if(self->position >= self->str.length)
+        if(!string_getAt(&self->str, self->position, &cur))
             return false;
-        switch(self->str.buffer[self->position]) {
+        switch(cur) {
             case ' ': break;
-            case '(': goto L_PAREN_OPEN;
-            case ')': goto L_PAREN_CLOSE;
+            case '(': case ')': goto L_PAREN;
             default: goto L_BREAK_WHILE;
         }
         self->position++;
@@ -28,15 +29,14 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
 
 
     startPos = self->position;
-    bool isString = self->str.buffer[self->position] == '"';
-    bool isNum = isNumChar(self->str.buffer[self->position]);
+    bool isString = cur == '"';
+    bool isNum = isNumChar(cur);
     self->position++;
 
-    while(self->position < self->str.length) {
-        char cur = self->str.buffer[self->position];
+    while(string_getAt(&self->str, self->position, &cur)) {
         switch(cur) {
             case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
-            case '"': if (isString) { self->position++; goto L_OTHER; } else goto L_FAIL;
+            case '"': if (isString) goto L_STRING; else goto L_FAIL;
             default: if(isNum && !isNumChar(cur)) goto L_FAIL; else break;
         }
         self->position++;
@@ -48,32 +48,58 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
         goto L_OTHER;
     } else goto L_FAIL;
 
-L_PAREN_OPEN:
-    out_token->tokenKind = TOKEN_PAREN_OPEN;
-    out_token->value.strValue.buffer = NULL;
+L_PAREN:
+    out_token->tokenKind = cur == '(' ? TOKEN_PAREN_OPEN : TOKEN_PAREN_CLOSE;
+    string_default(&out_token->value.strValue);
     self->position++;
     return true;
 
-L_PAREN_CLOSE:
-    out_token->tokenKind = TOKEN_PAREN_CLOSE;
-    out_token->value.strValue.buffer = NULL;
+L_STRING:
     self->position++;
-    return true;
+    out_token->tokenKind = TOKEN_STRING;
+    return string_substring_deep(&out_token->value.strValue, &self->str, startPos + 1, self->position - startPos - 2);
 
 L_OTHER:
     string_substring_shallow(&subview, &self->str, startPos, self->position - startPos);
-    if(isNum) {
+    if (isNum) {
         out_token->tokenKind = TOKEN_NUMERIC;
-        string_copy(&out_token->value.strValue, &subview);
-    } else  if(isString) {
-        out_token->tokenKind = TOKEN_STRING;
-        string_substring_deep(&out_token->value.strValue, &subview, 1, subview.length - 2);
+        return string_parseInt(&subview, &out_token->value.numValue);
     } else {
         out_token->tokenKind = TOKEN_SYMBOL;
-        string_copy(&out_token->value.strValue, &subview);
+        return string_copy(&out_token->value.strValue, &subview);
     }
-    return true;
+
 L_FAIL:
     self->position++;
     return false;
+}
+
+bool
+token_toString(token_t * self, string_t * out) {
+    char str_str[] = "TOKEN_STRING(";
+    char str_sym[] = "TOKEN_SYMBOL(";
+    int str_first_size = self->tokenKind == TOKEN_STRING ? sizeof(str_str) - 1 : sizeof(str_sym) - 1;
+    char * str_first = self->tokenKind == TOKEN_STRING ? str_str : str_sym;
+    switch (self->tokenKind) {
+    case TOKEN_PAREN_OPEN: return string_new_deep2(out, "TOKEN_PAREN_OPEN");
+    case TOKEN_PAREN_CLOSE: return string_new_deep2(out, "TOKEN_PAREN_CLOSE");
+    case TOKEN_NUMERIC: {
+        char buf[40]; // 40‚ ‚ê‚Î\•ª‚Å‚µ‚å
+        sprintf(buf, "TOKEN_NUMERIC(%d)", self->value.numValue);
+        return string_new_deep2(out, buf);
+    }
+    case TOKEN_STRING:
+    case TOKEN_SYMBOL: {
+        string_t first;
+        string_new_shallow(&first, str_first, str_first_size);
+        string_t last;
+        string_new_shallow(&last, ")", 1);
+        if (!string_new(out, str_first_size + 1 + string_getLength(&self->value.strValue))) return false;
+        string_overWrite(out, &first, 0);
+        string_overWrite(out, &self->value.strValue, str_first_size);
+        string_overWrite(out, &last, string_getLength(out) - 1);
+        return true;
+    }
+    default: return false;
+    }
 }

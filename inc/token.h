@@ -2,12 +2,13 @@
 #include <stdbool.h>
 #include "string_t.h"
 
-typedef int token_kind_t;
-static const token_kind_t TOKEN_PAREN_OPEN = 0;
-static const token_kind_t TOKEN_PAREN_CLOSE = 1;
-static const token_kind_t TOKEN_SYMBOL = 2;
-static const token_kind_t TOKEN_STRING = 3;
-static const token_kind_t TOKEN_NUMERIC = 4;
+typedef enum token_kind {
+    TOKEN_PAREN_OPEN,
+    TOKEN_PAREN_CLOSE,
+    TOKEN_SYMBOL,
+    TOKEN_STRING,
+    TOKEN_NUMERIC
+} token_kind_t;
 
 typedef struct token {
     token_kind_t tokenKind;
@@ -18,7 +19,7 @@ typedef struct token {
 } token_t;
 
 typedef struct tokenizer {
-    int32_t position;
+    size_t position;
     string_t str;
 } tokenizer_t;
 
@@ -28,3 +29,6 @@ tokenizer_new(string_t str);
 
 bool
 tokenizer_next(tokenizer_t * self, token_t * out_token);
+
+bool
+token_toString(token_t * self, string_t * out);
