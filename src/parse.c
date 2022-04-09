@@ -43,20 +43,21 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 				}
 				goto L_END;
 			}
+			so = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+			if (so == NULL) goto L_FAIL;
+			switch (ot.tokenKind) {
+			case TOKEN_PAREN_CLOSE: schemeObject_new_nil(so); break;
+			case TOKEN_NUMERIC: schemeObject_new_number(so, ot.value.numValue); break;
+			case TOKEN_STRING: schemeObject_new_string(so, ot.value.strValue); break;
+			case TOKEN_SYMBOL: schemeObject_new_symbol(so, ot.value.strValue); break;
+			default: break; // for gcc warning.
+			}
 			if (ot.tokenKind == TOKEN_PAREN_CLOSE) {
+				if (!env_append(current, so)) goto L_FAIL;
 				so = current->head;
 				linkedList_pop2(&envStack, NULL, parseEnv_t);
 				if (envStack == NULL) goto L_END;
 				current = linkedList_get2(envStack, parseEnv_t);
-			} else {
-				so = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-				if (so == NULL) goto L_FAIL;
-				switch (ot.tokenKind) {
-				case TOKEN_NUMERIC: schemeObject_new_number(so, ot.value.numValue); break;
-				case TOKEN_STRING: schemeObject_new_string(so, ot.value.strValue); break;
-				case TOKEN_SYMBOL: schemeObject_new_symbol(so, ot.value.strValue); break;
-				default: break; // for gcc warning.
-				}
 			}
 			if (!env_append(current, so)) goto L_FAIL;
 		}
