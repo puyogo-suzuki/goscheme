@@ -50,7 +50,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 			case TOKEN_NUMERIC: schemeObject_new_number(so, ot.value.numValue); break;
 			case TOKEN_STRING: schemeObject_new_string(so, ot.value.strValue); break;
 			case TOKEN_SYMBOL: schemeObject_new_symbol(so, ot.value.strValue); break;
-			//default: break; // make gcc silent!
+			default: break; // make gcc silent!
 			}
 			if (ot.tokenKind == TOKEN_PAREN_CLOSE) {
 				if (!env_append(current, so)) goto L_FAIL;
