@@ -2,7 +2,7 @@
 
 bool
 linkedList_new(linkedList_t ** out, size_t size) {
-	*out = reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
+	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
 	if (*out == NULL) return false;
 	(*out)->next = LINKEDLIST_TERMINATOR;
 #if _DEBUG
@@ -13,7 +13,7 @@ linkedList_new(linkedList_t ** out, size_t size) {
 
 bool
 linkedList_new3(linkedList_t ** out, void * value, size_t size) {
-	*out = reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
+	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
 	if (*out == NULL) return false;
 	(*out)->next = LINKEDLIST_TERMINATOR;
 	memcpy(&((*out)->value), value, size);
