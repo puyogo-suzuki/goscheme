@@ -30,7 +30,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 			if (!linkedList_add2(&envStack, &newEnv, parseEnv_t)) goto L_FAIL;
 			current = linkedList_get2(envStack, parseEnv_t);
 			current->head = NULL;
-			current->tailnext = &(current->head); // newEnv‚Å‚â‚é‚ÆCŠÖ””²‚¯‚½‚Æ‚«newEnv‚Í‰ğ•ú‚³‚ê‚Ä‚µ‚Ü‚¢‚Ü‚·D
+			current->tailnext = &(current->head); // newEnvã§ã‚„ã‚‹ã¨ï¼Œé–¢æ•°æŠœã‘ãŸã¨ãnewEnvã¯è§£æ”¾ã•ã‚Œã¦ã—ã¾ã„ã¾ã™ï¼
 		} else {
 			if (current == NULL) { // mono symbol.
 				so = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));

@@ -84,7 +84,7 @@ token_toString(token_t * self, string_t * out) {
     case TOKEN_PAREN_OPEN: return string_new_deep2(out, "TOKEN_PAREN_OPEN");
     case TOKEN_PAREN_CLOSE: return string_new_deep2(out, "TOKEN_PAREN_CLOSE");
     case TOKEN_NUMERIC: {
-        char buf[40]; // 40‚ ‚ê‚Î\•ª‚Å‚µ‚å
+        char buf[40]; // 40ã‚ã‚Œã°ååˆ†ã§ã—ã‚‡
         sprintf(buf, "TOKEN_NUMERIC(%d)", self->value.numValue);
         return string_new_deep2(out, buf);
     }
