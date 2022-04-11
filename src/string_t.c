@@ -79,6 +79,18 @@ string_overWrite(string_t * dst, const string_t * src, size_t start) {
     return true;
 }
 
+bool
+string_equals(string_t * a, string_t * b) {
+    if(a->length != b->length) return false;
+    return strncmp(a->buffer, b->buffer, a->length) == 0;
+}
+
+bool
+string_equals2(string_t * a, char * b, int length) {
+    if(a->length != length) return false;
+    return strncmp(a->buffer, b, length) == 0;
+}
+
 size_t
 string_getLength(string_t * s) {
     return s->length;
@@ -116,4 +128,51 @@ string_free(string_t * s) {
 #endif
     free(s->buffer);
     string_default(s);
+}
+
+bool
+stringBuilder_new(stringBuilder_t * outsb) {
+    outsb->buffer = (char *)reallocarray(NULL, sizeof(char), STRINGBUILDER_INITIAL_SIZE);
+    if(outsb->buffer == NULL) return false;
+    outsb->bufferSize = STRINGBUILDER_INITIAL_SIZE;
+    outsb->length = 0;
+    outsb->buffer[0] = '0';
+    return true;
+}
+
+bool
+stringBuilder_append(stringBuilder_t * outsb, char * str, int length) {
+    if(length + outsb->length + 1 > outsb->bufferSize) {
+        int increaseSize = 0;
+        if(outsb->bufferSize < STRINGBUILDER_INCREASE_SIZE)
+            increaseSize = outsb->bufferSize;
+        else
+            increaseSize = STRINGBUILDER_INCREASE_SIZE;
+        if(length + outsb->length + 1 > outsb->bufferSize + STRINGBUILDER_INCREASE_SIZE)
+            increaseSize = length + outsb->length + 1 - outsb->bufferSize;
+        char * p = (char *)reallocarray(outsb->buffer, sizeof(char), outsb->bufferSize + increaseSize);
+        if(p == NULL) return false;
+        outsb->buffer = p;
+        outsb->bufferSize += increaseSize;
+    }
+    for(int i = 0; i < length; ++i)
+        outsb->buffer[outsb->length + i] = str[i];
+    outsb->length += length;
+    outsb->buffer[outsb->length] = '\0';
+    return true;
+}
+
+bool
+stringBuilder_toString(string_t * outstr, stringBuilder_t * insb) {
+    return string_new_deep(outstr, insb->buffer, insb->length);
+}
+
+void
+stringBuilder_free(stringBuilder_t * sb) {
+    free(sb->buffer);
+#if _DEBUG
+    sb->buffer = NULL;
+    sb->bufferSize = 0;
+    sb->length = 0;
+#endif
 }

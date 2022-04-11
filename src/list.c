@@ -44,8 +44,9 @@ linkedList_get(linkedList_t * self) {
 	return (void *)(&(self->value));
 }
 
-void
+bool
 linkedList_pop(linkedList_t ** self, void * storage, size_t size) {
+	if(*self == NULL) return false;
 	if (storage != NULL) {
 		void * ret = linkedList_get(*self);
 		memcpy(storage, ret, size);
@@ -54,6 +55,7 @@ linkedList_pop(linkedList_t ** self, void * storage, size_t size) {
 	linkedList_t * n = (*self)->next;
 	*self = n;
 	free(prev);
+	return true;
 }
 
 void

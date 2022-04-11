@@ -6,6 +6,7 @@
 
 typedef enum token_kind {
     TOKEN_PAREN_OPEN,
+    TOKEN_QUOTE_PAREN_OPEN,
     TOKEN_PAREN_CLOSE,
     TOKEN_SYMBOL,
     TOKEN_STRING,

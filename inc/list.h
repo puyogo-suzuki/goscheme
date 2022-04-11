@@ -21,7 +21,7 @@ typedef struct linkedListAppend {
 #define linkedList_new4(o, value, type) linkedList_new3(o, value, sizeof(type))
 #define linkedList_add2(o, value, type) linkedList_add(o, value, sizeof(type))
 #define linkedList_get2(self, type) (type*)linkedList_get(self);
-#define linkedList_pop2(self, storage, type) linkedList_pop(self, storage, sizeof(type));
+#define linkedList_pop2(self, storage, type) linkedList_pop(self, storage, sizeof(type))
 #define linkedListAppend_append2(self, value, type) linkedListAppend_append(self, value, sizeof(type))
 bool
 linkedList_new(linkedList_t ** out, size_t size);
@@ -33,7 +33,7 @@ void
 linkedList_free(linkedList_t * out);
 void *
 linkedList_get(linkedList_t * self);
-void
+bool
 linkedList_pop(linkedList_t ** self, void * storage, size_t size);
 
 void
