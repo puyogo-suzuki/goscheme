@@ -36,6 +36,8 @@ void *
 linkedList_get(linkedList_t * self);
 bool
 linkedList_pop(linkedList_t ** self, void * storage, size_t size);
+void *
+linkedList_search(linkedList_t * self, void * searchValue, bool(comparer(void *, void *)));
 
 void
 linkedListAppend_init(linkedListAppend_t * out, linkedList_t * current);
