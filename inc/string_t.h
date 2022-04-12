@@ -43,6 +43,6 @@ void string_default(string_t * s);
 void string_free(string_t * s);
 
 error_t stringBuilder_new(stringBuilder_t * outsb);
-error_t stringBuilder_append(stringBuilder_t * outsb, char * str, int length);
+error_t stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length);
 error_t stringBuilder_toString(string_t * outstr, stringBuilder_t * insb);
 void stringBuilder_free(stringBuilder_t * sb);

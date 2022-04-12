@@ -1,5 +1,4 @@
-#include "io.h"
-
+ï»¿#include "io.h"
 
 void
 string_write(FILE * f, string_t * str) {
@@ -13,7 +12,7 @@ void
 string_writeLine(FILE * f, string_t * str) {
 	string_write(f, str);
 #if _MSC_VER
-	putc('\r', f); // À‚Í—v‚ç‚ñ
+	putc('\r', f); // å®Ÿã¯è¦ã‚‰ã‚“
 #endif
 	putc('\n', f);
 }

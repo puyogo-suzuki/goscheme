@@ -141,7 +141,7 @@ stringBuilder_new(stringBuilder_t * outsb) {
 }
 
 error_t
-stringBuilder_append(stringBuilder_t * outsb, char * str, int length) {
+stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length) {
     if(length + outsb->length + 1 > outsb->bufferSize) {
         size_t increaseSize = 0;
         if(outsb->bufferSize < STRINGBUILDER_INCREASE_SIZE)
