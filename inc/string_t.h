@@ -34,6 +34,7 @@ error_t string_copy(string_t * dst, string_t * src);
 error_t string_substring_shallow(string_t * outstring, string_t * src, size_t start, size_t length);
 error_t string_substring_deep(string_t * outstring, const string_t * src, size_t start, size_t length);
 error_t string_getAt(string_t * s, size_t index, char * outch);
+int32_t string_hash(string_t * self);
 error_t string_overWrite(string_t * dst, const string_t *  src, size_t start);
 bool string_equals(string_t * a, string_t * b);
 bool string_equals2(string_t * a, char * b, int length);

@@ -67,6 +67,15 @@ string_getAt(string_t * s, size_t index, char * outch) {
     return ERR_SUCCESS;
 }
 
+int32_t string_hash(string_t * self)
+{
+    char ch;
+    int32_t result = 0;
+    for (size_t i = 0; string_getAt(self, i, &ch); ++i)
+        result ^= ch;
+    return result;
+}
+
 error_t
 string_overWrite(string_t * dst, const string_t * src, size_t start) {
     if (start + src->length > dst->length) {
