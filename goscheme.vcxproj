@@ -159,7 +159,6 @@
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\string_t.c" />
     <ClCompile Include="src\token.c" />
-    <ClCompile Include="inc\parse.h" />
     <ClCompile Include="src\list.c" />
     <ClCompile Include="src\winbsdfunc.c" />
   </ItemGroup>
@@ -168,6 +167,7 @@
     <ClInclude Include="inc\hashtable.h" />
     <ClInclude Include="inc\io.h" />
     <ClInclude Include="inc\list.h" />
+    <ClInclude Include="inc\parse.h" />
     <ClInclude Include="inc\string_t.h" />
     <ClInclude Include="inc\token.h" />
     <ClInclude Include="inc\schemeObject_t.h" />
