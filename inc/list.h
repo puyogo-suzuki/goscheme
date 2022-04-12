@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "winbsdfunc.h"
+#include "error.h"
 
 #define LINKEDLIST_TERMINATOR NULL
 
@@ -23,11 +24,11 @@ typedef struct linkedListAppend {
 #define linkedList_get2(self, type) (type*)linkedList_get(self);
 #define linkedList_pop2(self, storage, type) linkedList_pop(self, storage, sizeof(type))
 #define linkedListAppend_append2(self, value, type) linkedListAppend_append(self, value, sizeof(type))
-bool
+error_t
 linkedList_new(linkedList_t ** out, size_t size);
-bool
+error_t
 linkedList_new3(linkedList_t ** out, void * value, size_t size);
-bool
+error_t
 linkedList_add(linkedList_t ** out, void * value, size_t size);
 void
 linkedList_free(linkedList_t * out);

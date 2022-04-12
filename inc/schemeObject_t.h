@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <string_t.h>
+#include "error.h"
 
 #define SCHEME_OBJECT_NILL NULL
 
@@ -25,8 +26,8 @@ typedef struct schemeObject {
 
 #define schemeObject_new_cons2(out, value) schemeObject_new_cons(out, value, SCHEME_OBJECT_NILL)
 
-bool schemeObject_new_string(schemeObject_t * out, string_t str);
-bool schemeObject_new_number(schemeObject_t * out, int32_t num);
-bool schemeObject_new_symbol(schemeObject_t * out, string_t sym);
-bool schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
-bool schemeObject_toString(string_t * out, schemeObject_t * inobj);
+error_t schemeObject_new_string(schemeObject_t * out, string_t str);
+error_t schemeObject_new_number(schemeObject_t * out, int32_t num);
+error_t schemeObject_new_symbol(schemeObject_t * out, string_t sym);
+error_t schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
+error_t schemeObject_toString(string_t * out, schemeObject_t * inobj);

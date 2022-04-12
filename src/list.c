@@ -1,31 +1,31 @@
 #include "list.h"
 
-bool
+error_t
 linkedList_new(linkedList_t ** out, size_t size) {
 	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
-	if (*out == NULL) return false;
+	if (*out == NULL) return ERR_OUT_OF_MEMORY;
 	(*out)->next = LINKEDLIST_TERMINATOR;
 #if _DEBUG
 	memset(&((*out)->value), 0, size);
 #endif
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool
+error_t
 linkedList_new3(linkedList_t ** out, void * value, size_t size) {
 	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
-	if (*out == NULL) return false;
+	if (*out == NULL) return ERR_OUT_OF_MEMORY;
 	(*out)->next = LINKEDLIST_TERMINATOR;
 	memcpy(&((*out)->value), value, size);
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool
+error_t
 linkedList_add(linkedList_t ** out, void * value, size_t size) {
 	linkedList_t * prev = *out;
-	if (!linkedList_new3(out, value, size)) return false;
+	CHKERROR(linkedList_new3(out, value, size))
 	(*out)->next = prev;
-	return true;
+	return ERR_SUCCESS;
 }
 
 void

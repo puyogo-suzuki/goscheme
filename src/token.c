@@ -17,7 +17,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
     string_t subview;
     char cur = '\0';
     while(true) {
-        if(!string_getAt(&self->str, self->position, &cur))
+        if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
             return false;
         switch(cur) {
             case ' ': break;
@@ -29,7 +29,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
                 goto L_PAREN;
             case '\'':
                 self->position++;
-                if(!string_getAt(&self->str, self->position, &cur))
+                if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
                     return false;
                 if(cur != '(') goto L_FAIL;
                 self->position++;
@@ -46,7 +46,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
     bool isNum = isNumChar(cur);
     self->position++;
 
-    while(string_getAt(&self->str, self->position, &cur)) {
+    while(string_getAt(&self->str, self->position, &cur) == ERR_SUCCESS) {
         switch(cur) {
             case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
             case '"': if (isString) goto L_STRING; else goto L_FAIL;
@@ -69,16 +69,16 @@ L_PAREN:
 L_STRING:
     self->position++;
     out_token->tokenKind = TOKEN_STRING;
-    return string_substring_deep(&out_token->value.strValue, &self->str, startPos + 1, self->position - startPos - 2);
+    return string_substring_deep(&out_token->value.strValue, &self->str, startPos + 1, self->position - startPos - 2) == ERR_SUCCESS;
 
 L_OTHER:
     string_substring_shallow(&subview, &self->str, startPos, self->position - startPos);
     if (isNum) {
         out_token->tokenKind = TOKEN_NUMERIC;
-        return string_parseInt(&subview, &out_token->value.numValue);
+        return string_parseInt(&subview, &out_token->value.numValue) == ERR_SUCCESS;
     } else {
         out_token->tokenKind = TOKEN_SYMBOL;
-        return string_copy(&out_token->value.strValue, &subview);
+        return string_copy(&out_token->value.strValue, &subview) == ERR_SUCCESS;
     }
 
 L_FAIL:
@@ -86,7 +86,7 @@ L_FAIL:
     return false;
 }
 
-bool
+error_t
 token_toString(token_t * self, string_t * out) {
     char str_str[] = "TOKEN_STRING(";
     char str_sym[] = "TOKEN_SYMBOL(";
@@ -107,12 +107,12 @@ token_toString(token_t * self, string_t * out) {
         string_new_shallow(&first, str_first, str_first_size);
         string_t last;
         string_new_shallow(&last, ")", 1);
-        if (!string_new(out, str_first_size + 1 + string_getLength(&self->value.strValue))) return false;
+        CHKERROR(string_new(out, str_first_size + 1 + string_getLength(&self->value.strValue)))
         string_overWrite(out, &first, 0);
         string_overWrite(out, &self->value.strValue, str_first_size);
         string_overWrite(out, &last, string_getLength(out) - 1);
-        return true;
+        return ERR_SUCCESS;
     }
-    default: return false;
+    default: return ERR_ILLEGAL_STATE;
     }
 }
