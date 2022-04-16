@@ -105,14 +105,15 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					cur = cur->value.consValue.value;
 					if(cur == SCHEME_OBJECT_NILL) {
 						CHKERROR(stringBuilder_append(&sb, "NIL", 3))
-					}else if (cur->kind == SCHEME_OBJECT_CONS) {
+					}else if (cur->kind == SCHEME_OBJECT_CONS) CHKERROR(stringBuilder_append(&sb, "(", 1))
+					/*else if (cur->kind == SCHEME_OBJECT_CONS) {
 						if (cur->value.consValue.value->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&cur->value.consValue.value->value.symValue, "quote", 5)) {
 							CHKERROR(stringBuilder_append(&sb, "'", 1))
 							cur = cur->value.consValue.next;
 						}
 						else
 							CHKERROR(stringBuilder_append(&sb, "(", 1))
-					}
+					}*/ // 実装面倒
 					break;
 				}
 				case SCHEME_OBJECT_EXTERN_FUNCTION:

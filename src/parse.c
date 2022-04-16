@@ -35,6 +35,17 @@ parse_symbol(schemeObject_t ** so, token_t * ot) {
 	}
 }
 
+#define PARSE_CHKERROR(val) if(errorReason = (val)) goto L_FAIL;
+#define PARSE_POP { \
+so = current->head;\
+if (!linkedList_pop2(&envStack, NULL, parseEnv_t)) {\
+	errorReason = ERR_PARSE_TOO_MUCH_PAREN_CLOSE; goto L_FAIL;\
+}\
+if (envStack == NULL) goto L_END;\
+current = linkedList_get2(envStack, parseEnv_t);\
+PARSE_CHKERROR(env_append(current, so)) \
+}
+
 error_t
 parse(schemeObject_t ** out, tokenizer_t * input) {
 	token_t ot;
@@ -43,53 +54,41 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 	schemeObject_t * so = NULL;
 	error_t errorReason = ERR_SUCCESS;
 	while (tokenizer_next(input, &ot)) {
-		if (ot.tokenKind == TOKEN_PAREN_OPEN || ot.tokenKind == TOKEN_QUOTE_PAREN_OPEN) {
-			parseEnv_t newEnv = {NULL, NULL, false};
-			if (errorReason = linkedList_add2(&envStack, &newEnv, parseEnv_t)) goto L_FAIL;
+		if (ot.tokenKind == TOKEN_PAREN_OPEN || ot.tokenKind == TOKEN_QUOTE) {
+			parseEnv_t newEnv = { NULL, NULL, false };
+			PARSE_CHKERROR(linkedList_add2(&envStack, &newEnv, parseEnv_t))
 			current = linkedList_get2(envStack, parseEnv_t);
 			current->head = NULL;
-			current->tailnext = &(current->head); // newEnvでやると，関数抜けたときnewEnvは解放されてしまいます．
-			if(ot.tokenKind == TOKEN_QUOTE_PAREN_OPEN) {
+			current->tailnext = &(current->head);
+			if(ot.tokenKind == TOKEN_QUOTE) {
 				current->quote = true;
 				// quote symbol insertion.
 				so = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 				if (so == NULL) { errorReason = ERR_OUT_OF_MEMORY; goto L_FAIL; }
 				string_t st;
-				if(errorReason = string_new_deep2(&st, "quote")) goto L_FAIL;
-				if(errorReason = schemeObject_new_symbol(so, st)) goto L_FAIL;
-				if(errorReason = env_append(current, so)) goto L_FAIL;
-				// create new list.
-				if(errorReason = linkedList_add2(&envStack, &newEnv, parseEnv_t)) goto L_FAIL;
-				current = linkedList_get2(envStack, parseEnv_t);
-				current->head = NULL;
-				current->tailnext = &(current->head); // newEnvでやると，関数抜けたときnewEnvは解放されてしまいます．
+				PARSE_CHKERROR(string_new_deep2(&st, "quote"))
+				PARSE_CHKERROR(schemeObject_new_symbol(so, st))
+				PARSE_CHKERROR(env_append(current, so))
 			}
 		} else {
-			if (current == NULL) { // mono symbol.
-				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL;
-				goto L_END;
+			if(current == NULL) // mono symbol.
+				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL; else goto L_END;
+			if(ot.tokenKind == TOKEN_PAREN_CLOSE) {
+				PARSE_POP
+				while(current->quote) PARSE_POP // when '( ...
+			} else if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL;
+			else {
+				PARSE_CHKERROR(env_append(current, so))
+				while(current->quote)PARSE_POP // when 'some
 			}
-			if(ot.tokenKind == TOKEN_PAREN_CLOSE) { 
-				so = current->head;
-				linkedList_pop2(&envStack, NULL, parseEnv_t);
-				if (envStack == NULL) goto L_END;
-				current = linkedList_get2(envStack, parseEnv_t);
-				if(current->quote) { // when '(
-					if (errorReason = env_append(current, so)) goto L_FAIL;
-					so = current->head;
-					if (linkedList_pop2(&envStack, NULL, parseEnv_t)) {
-						errorReason = ERR_PARSE_TOO_MUCH_PAREN_CLOSE; goto L_FAIL;
-					}
-					if(envStack == NULL) goto L_END;
-					current = linkedList_get2(envStack, parseEnv_t);
-				}
-			} else {
-				so = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-				if (so == NULL) { errorReason = ERR_OUT_OF_MEMORY; goto L_FAIL; }
-				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL;
-			}
-			if (errorReason = env_append(current, so)) goto L_FAIL;
 		}
+	}
+	if (current != NULL && current->quote) {
+		so = current->head;
+		if (!linkedList_pop2(&envStack, NULL, parseEnv_t)) {
+			errorReason = ERR_PARSE_TOO_MUCH_PAREN_CLOSE; goto L_FAIL;
+		}
+		goto L_END;
 	}
 	errorReason = ERR_ILLEGAL_STATE;
 	goto L_FAIL;

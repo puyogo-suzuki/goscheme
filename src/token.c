@@ -28,12 +28,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
                 out_token->tokenKind = TOKEN_PAREN_CLOSE;
                 goto L_PAREN;
             case '\'':
-                self->position++;
-                if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
-                    return false;
-                if(cur != '(') goto L_FAIL;
-                self->position++;
-                out_token->tokenKind = TOKEN_QUOTE_PAREN_OPEN;
+                out_token->tokenKind = TOKEN_QUOTE;
                 goto L_PAREN;
             default: goto L_BREAK_WHILE;
         }
@@ -95,7 +90,7 @@ token_toString(token_t * self, string_t * out) {
     char * str_first = self->tokenKind == TOKEN_STRING ? str_str : str_sym;
     switch (self->tokenKind) {
     case TOKEN_PAREN_OPEN: return string_new_deep2(out, "TOKEN_PAREN_OPEN");
-    case TOKEN_QUOTE_PAREN_OPEN: return string_new_deep2(out, "TOKEN_QUOTE_PAREN_OPEN");
+    case TOKEN_QUOTE: return string_new_deep2(out, "TOKEN_QUOTE");
     case TOKEN_PAREN_CLOSE: return string_new_deep2(out, "TOKEN_PAREN_CLOSE");
     case TOKEN_NUMERIC: {
         char buf[40]; // 40あれば十分でしょ
