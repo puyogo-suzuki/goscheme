@@ -57,6 +57,13 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
 }
 
 error_t
+schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+	if (val->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	*out = val->value.consValue.value;
+	return ERR_SUCCESS;
+}
+
+error_t
 schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 	stringBuilder_t sb;
 	linkedList_t * stack = NULL;
@@ -98,8 +105,15 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					cur = cur->value.consValue.value;
 					if(cur == SCHEME_OBJECT_NILL) {
 						CHKERROR(stringBuilder_append(&sb, "NIL", 3))
-					} else if(cur->kind == SCHEME_OBJECT_CONS)
-						CHKERROR(stringBuilder_append(&sb, "(", 1))
+					}else if (cur->kind == SCHEME_OBJECT_CONS) {
+						if (cur->value.consValue.value->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&cur->value.consValue.value->value.symValue, "quote", 5)) {
+							CHKERROR(stringBuilder_append(&sb, "'", 1))
+							cur = cur->value.consValue.next;
+						}
+						else
+							CHKERROR(stringBuilder_append(&sb, "(", 1))
+					}
+					break;
 				}
 				case SCHEME_OBJECT_EXTERN_FUNCTION:
 					CHKERROR(stringBuilder_append(&sb, "<FUNCTION>", 10))

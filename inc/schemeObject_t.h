@@ -46,4 +46,6 @@ error_t schemeObject_new_extFunc(schemeObject_t * out, struct environment * envi
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
 
+error_t schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
+
 error_t schemeObject_toString(string_t * out, schemeObject_t * inobj);

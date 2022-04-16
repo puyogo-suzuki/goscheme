@@ -20,16 +20,22 @@ environment_new(environment_t * out, environment_t * parent)
 }
 
 error_t
+addfunc(environment_t * out, char * name, size_t name_length, error_t(*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+	string_t str;
+	string_new_deep(&str, name, name_length);
+	schemeObject_t * obj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if (obj == NULL) return ERR_OUT_OF_MEMORY;
+	schemeObject_new_extFunc(obj, out, func);
+	environment_register(out, str, obj);
+}
+
+error_t
 environment_new_global(environment_t * out)
 {
 	CHKERROR(environment_new(out, NULL))
 	// TODO:Implement buildin function.
-	string_t str;
-	string_new_deep(&str, "define", 6);
-	schemeObject_t * obj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-	if (obj == NULL) return ERR_OUT_OF_MEMORY;
-	schemeObject_new_extFunc(obj, out, environment_setq);
-	environment_register(out, str, obj);
+	CHKERROR(addfunc(out, "define", 6, environment_setq));
+	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote));
 	return ERR_SUCCESS;
 }
 
@@ -62,9 +68,8 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 	return hashtable_add(&(self->env), &newhi, sizeof(hashItem_t), (int32_t(*)(void *))hashing);
 }
 
-
 error_t
-environment_setq(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
+environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
 {
 	schemeObject_t * car, * cdr, * cdrres;
 	string_t s;
