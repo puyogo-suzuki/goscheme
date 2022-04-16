@@ -27,9 +27,6 @@
     <ClCompile Include="src\parse.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="inc\parse.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\schemeObject_t.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -46,6 +43,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\hashtable.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\environment.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,6 +75,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="inc\error.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\parse.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\environment.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\machine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

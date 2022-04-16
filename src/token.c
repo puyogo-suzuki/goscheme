@@ -20,7 +20,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
         if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
             return false;
         switch(cur) {
-            case ' ': break;
+            case ' ': case '\n': break;
             case '(':
                 out_token->tokenKind = TOKEN_PAREN_OPEN;
                 goto L_PAREN;
@@ -48,6 +48,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
 
     while(string_getAt(&self->str, self->position, &cur) == ERR_SUCCESS) {
         switch(cur) {
+            case '\n': goto L_OTHER;
             case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
             case '"': if (isString) goto L_STRING; else goto L_FAIL;
             default: if(isNum && !isNumChar(cur)) goto L_FAIL; else break;

@@ -33,6 +33,30 @@ schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject
 }
 
 error_t
+schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+	out->kind = SCHEME_OBJECT_EXTERN_FUNCTION;
+	out->value.extFuncValue.environment = environment;
+	out->value.extFuncValue.func = func;
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
+{
+	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	*out = self->value.consValue.value;
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
+{
+	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	*out = self->value.consValue.next;
+	return ERR_SUCCESS;
+}
+
+error_t
 schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 	stringBuilder_t sb;
 	linkedList_t * stack = NULL;
@@ -58,7 +82,7 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 				case SCHEME_OBJECT_STRING:
 					CHKERROR(stringBuilder_append(&sb, "\"", 1))
 					CHKERROR(stringBuilder_append2(&sb, &(cur->value.strValue)))
-						CHKERROR(stringBuilder_append(&sb, "\"", 1))
+					CHKERROR(stringBuilder_append(&sb, "\"", 1))
 					goto CONTINUE_OUTER_WHILE;
 				case SCHEME_OBJECT_NUMBER: {
 					char buf[32];
@@ -77,6 +101,9 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					} else if(cur->kind == SCHEME_OBJECT_CONS)
 						CHKERROR(stringBuilder_append(&sb, "(", 1))
 				}
+				case SCHEME_OBJECT_EXTERN_FUNCTION:
+					CHKERROR(stringBuilder_append(&sb, "<FUNCTION>", 10))
+					goto CONTINUE_OUTER_WHILE;
 			}
 		}
 		CONTINUE_OUTER_WHILE:

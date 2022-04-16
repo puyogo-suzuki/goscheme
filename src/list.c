@@ -58,13 +58,15 @@ linkedList_pop(linkedList_t ** self, void * storage, size_t size) {
 	return true;
 }
 
-void *
-linkedList_search(linkedList_t * self, void * searchValue, bool(comparer(void *, void *)))
+bool
+linkedList_search(linkedList_t * self, void ** outValue, void * searchValue, bool(comparer(void *, void *)))
 {
-	for (linkedList_t * cur = self; cur != NULL; cur = cur->next) {
-		if (comparer((void*) (&(cur->value)), searchValue)) return &(cur->value);
-	}
-	return NULL;
+	for (linkedList_t * cur = self; cur != NULL; cur = cur->next)
+		if (comparer((void *)(&(cur->value)), searchValue)) {
+			*outValue = &(cur->value);
+			return true;
+		}
+	return false;
 }
 
 void

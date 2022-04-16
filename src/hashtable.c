@@ -13,7 +13,7 @@ hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(
 	return linkedList_add(&(out->table[hasher(value) % HASHTABLE_SIZE]), value, valueSize);
 }
 
-void *
-hashtable_get(hashtable_t * self, void * value, int32_t(hasher(void *)), bool(comparer(void *, void *))) {
-	return linkedList_search(self->table[hasher(value) % HASHTABLE_SIZE], value, comparer);
+bool
+hashtable_get(hashtable_t * self, void ** outValue, void * value, int32_t(hasher(void *)), bool(comparer(void *, void *))) {
+	return linkedList_search(self->table[hasher(value) % HASHTABLE_SIZE], outValue, value, comparer);
 }

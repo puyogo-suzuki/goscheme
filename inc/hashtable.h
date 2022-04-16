@@ -13,5 +13,5 @@ hashtable_new(hashtable_t * out);
 error_t
 hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(void *)));
 
-void *
-hashtable_get(hashtable_t * self, void * value, int32_t(hasher(void *)), bool(comparer(void *, void *)));
+bool
+hashtable_get(hashtable_t * self, void ** outValue, void * value, int32_t(hasher(void *)), bool(comparer(void *, void *)));
