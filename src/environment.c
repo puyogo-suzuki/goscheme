@@ -43,6 +43,9 @@ environment_new_global(environment_t * out)
 	// TODO:Implement buildin function.
 	CHKERROR(addfunc(out, "define", 6, environment_setq));
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote));
+	CHKERROR(addfunc(out, "car", 3, schemeObject_car2));
+	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2));
+
 	return ERR_SUCCESS;
 }
 

@@ -1,6 +1,7 @@
 #include "schemeObject_t.h"
 #include "list.h"
 #include "common.h"
+#include "machine.h"
 #include <stdio.h>
 
 error_t
@@ -45,6 +46,29 @@ schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment,
 	return ERR_SUCCESS;
 }
 
+
+bool
+schemeObject_isList(schemeObject_t * self) {
+	schemeObject_t * cursor = self;
+	while(cursor != SCHEME_OBJECT_NILL) {
+		if(cursor->kind != SCHEME_OBJECT_CONS) return false;
+		cursor = cursor->value.consValue.next;
+	}
+	return true;
+}
+
+bool
+schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
+	schemeObject_t * cursor = self;
+	int i = 0;
+	for(i = 0; cursor != SCHEME_OBJECT_NILL; ++i) {
+		if(cursor->kind != SCHEME_OBJECT_CONS) return false;
+		cursor = cursor->value.consValue.next;
+	}
+	return listLength == i;
+}
+
+
 error_t
 schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
 {
@@ -53,6 +77,21 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
 	if(*out != NULL) CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
 }
+
+error_t
+schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+	if(!schemeObject_isListLimited(val, 1)) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	schemeObject_t * carres = NULL, * evalres = NULL;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	CHKERROR(schemeObject_car(val, &carres))
+	CHKERROR(gc_deref_schemeObject(val))
+	CHKERROR(machine_eval(self, env, &evalres, carres))
+	CHKERROR(gc_deref_schemeObject(carres))
+	CHKERROR(schemeObject_car(evalres, out))
+	CHKERROR(gc_deref_schemeObject(evalres))
+	return ERR_SUCCESS;
+}
+
 
 error_t
 schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
@@ -64,9 +103,25 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
 }
 
 error_t
+schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+	if(!schemeObject_isListLimited(val, 1)) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	schemeObject_t * carres = NULL, * evalres = NULL;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	CHKERROR(schemeObject_car(val, &carres))
+	CHKERROR(gc_deref_schemeObject(val))
+	CHKERROR(machine_eval(self, env, &evalres, carres))
+	CHKERROR(gc_deref_schemeObject(carres))
+	CHKERROR(schemeObject_cdr(evalres, out))
+	CHKERROR(gc_deref_schemeObject(evalres))
+	return ERR_SUCCESS;
+}
+
+
+error_t
 schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
 	if (val->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
 	*out = val->value.consValue.value;
+	CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
 }
 

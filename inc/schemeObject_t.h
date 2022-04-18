@@ -46,8 +46,15 @@ error_t schemeObject_new_symbol(schemeObject_t * out, string_t sym);
 error_t schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
 error_t schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
 
+bool
+schemeObject_isList(schemeObject_t * self);
+bool
+schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
+
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
 error_t schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
