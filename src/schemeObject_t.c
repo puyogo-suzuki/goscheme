@@ -7,6 +7,7 @@ error_t
 schemeObject_new_string(schemeObject_t * out, string_t str) {
 	out->kind = SCHEME_OBJECT_STRING;
 	out->value.strValue = str;
+	gcInfo_new(&out->gcInfo);
 	return ERR_SUCCESS;
 }
 
@@ -14,6 +15,7 @@ error_t
 schemeObject_new_number(schemeObject_t * out, int32_t num) {
 	out->kind = SCHEME_OBJECT_NUMBER;
 	out->value.numValue = num;
+	gcInfo_new(&out->gcInfo);
 	return ERR_SUCCESS;
 }
 
@@ -21,6 +23,7 @@ error_t
 schemeObject_new_symbol(schemeObject_t * out, string_t sym) {
 	out->kind = SCHEME_OBJECT_SYMBOL;
 	out->value.symValue = sym;
+	gcInfo_new(&out->gcInfo);
 	return ERR_SUCCESS;
 }
 
@@ -29,6 +32,7 @@ schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject
 	out->kind = SCHEME_OBJECT_CONS;
 	out->value.consValue.value = value;
 	out->value.consValue.next = next;
+	gcInfo_new(&out->gcInfo);
 	return ERR_SUCCESS;
 }
 
@@ -37,6 +41,7 @@ schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment,
 	out->kind = SCHEME_OBJECT_EXTERN_FUNCTION;
 	out->value.extFuncValue.environment = environment;
 	out->value.extFuncValue.func = func;
+	gcInfo_new(&out->gcInfo);
 	return ERR_SUCCESS;
 }
 
@@ -45,6 +50,7 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
 {
 	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
 	*out = self->value.consValue.value;
+	if(*out != NULL) CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
 }
 
@@ -53,6 +59,7 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
 {
 	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
 	*out = self->value.consValue.next;
+	if(*out != NULL) CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
 }
 

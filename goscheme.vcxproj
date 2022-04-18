@@ -163,6 +163,7 @@
     <ClCompile Include="src\token.c" />
     <ClCompile Include="src\list.c" />
     <ClCompile Include="src\winbsdfunc.c" />
+    <ClCompile Include="src\gc.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\environment.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="inc\token.h" />
     <ClInclude Include="inc\schemeObject_t.h" />
     <ClInclude Include="inc\winbsdfunc.h" />
+    <ClInclude Include="inc\gc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

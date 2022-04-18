@@ -3,6 +3,7 @@
 #include "io.h"
 #include "parse.h"
 #include "machine.h"
+#include "gc.h"
 
 int main(void) {
     machine_t vm;
@@ -21,7 +22,9 @@ int main(void) {
                 schemeObject_toString(&str, res);
                 string_writeLine(stdout, &str);
                 string_free(&str);
+                gc_deref_schemeObject(res);
             }
+            gc_deref_schemeObject(so);
         }
     }
     printf("end\n");

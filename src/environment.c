@@ -1,6 +1,8 @@
 #include "environment.h"
 #include "machine.h"
 #include "string_t.h"
+#include "gc.h"
+#include <stdio.h>
 
 typedef struct hashItem {
 	string_t name;
@@ -16,6 +18,7 @@ error_t
 environment_new(environment_t * out, environment_t * parent)
 {
 	out->parent = parent;
+	gcInfo_new(&out->gcInfo);
 	return hashtable_new(&(out->env));
 }
 
@@ -26,6 +29,8 @@ addfunc(environment_t * out, char * name, size_t name_length, error_t(*func)(str
 	schemeObject_t * obj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (obj == NULL) return ERR_OUT_OF_MEMORY;
 	schemeObject_new_extFunc(obj, out, func);
+	CHKERROR(gc_ref(&(out->gcInfo)))
+	CHKERROR(gc_ref(&(obj->gcInfo)))
 	environment_register(out, str, obj);
 	return ERR_SUCCESS;
 }
@@ -34,6 +39,7 @@ error_t
 environment_new_global(environment_t * out)
 {
 	CHKERROR(environment_new(out, NULL))
+	CHKERROR(gc_ref(&(out->gcInfo)))
 	// TODO:Implement buildin function.
 	CHKERROR(addfunc(out, "define", 6, environment_setq));
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote));
@@ -53,6 +59,7 @@ environment_getObject(environment_t * self, schemeObject_t ** outValue, string_t
 	bool ret = hashtable_get(&(self->env), (void **)&hi, str, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp);
 	if (!ret) return false;
 	*outValue = hi->value;
+	CHKERROR(gc_ref(&((*outValue)->gcInfo)))
 	return ret;
 }
 
@@ -72,15 +79,30 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 error_t
 environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
 {
-	schemeObject_t * car, * cdr, * cdrres;
-	string_t s;
+	schemeObject_t * car = NULL, * cdr = NULL, * cdrres = NULL;
+	string_t s = {};
+	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &car))
-	if (car->kind != SCHEME_OBJECT_SYMBOL)
+	if (car->kind != SCHEME_OBJECT_SYMBOL) {
+		CHKERROR(gc_deref_schemeObject(car))
+		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	CHKERROR(schemeObject_cdr(val, &cdr))
+	if(cdr == NULL) { // TODO:more contract.
+		printf("define: requires 2-length list.\n");
+		CHKERROR(gc_deref_schemeObject(car))
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	CHKERROR(machine_eval(self, env, &cdrres, cdr->value.consValue.value))
+	CHKERROR(gc_deref_schemeObject(cdr))
 	CHKERROR(string_copy(&s, &car->value.strValue))
+	CHKERROR(gc_deref_schemeObject(car))
 	CHKERROR(environment_register(env, s, cdrres))
+	CHKERROR(gc_ref(&(cdrres->gcInfo)))
+	CHKERROR(gc_deref_schemeObject(val))
+	// cdrresはevalで1度gc_ref済み
 	* out = cdrres;
 	return ERR_SUCCESS;
 }

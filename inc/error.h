@@ -1,4 +1,7 @@
 #pragma once
+#include <stdbool.h>
+
+static bool error_OOMRecoverByFreeing = true;
 
 typedef enum {
 	ERR_SUCCESS = 0,

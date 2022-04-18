@@ -4,11 +4,13 @@
 //#include "machine.h" <- cyclic reference!
 //#include "environment.h" <- cyclic reference!
 #include "error.h"
+#include "gc.h"
 
 struct environment;
 struct machine;
 
 #define SCHEME_OBJECT_NILL NULL
+
 
 typedef enum schemeObject_kind {
 	SCHEME_OBJECT_SYMBOL,
@@ -20,6 +22,7 @@ typedef enum schemeObject_kind {
 
 typedef struct schemeObject {
 	schemeObject_kind_t kind;
+	gcInfo_t gcInfo;
 	union {
 		string_t strValue;
 		int32_t numValue;

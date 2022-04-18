@@ -1,11 +1,13 @@
 #pragma once
 #include "hashtable.h"
 #include "schemeObject_t.h"
+#include "gc.h"
 
 struct machine;
 
 typedef struct environment {
 	struct environment * parent;
+	gcInfo_t gcInfo;
 	hashtable_t env;
 } environment_t;
 

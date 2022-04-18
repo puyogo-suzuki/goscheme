@@ -2,6 +2,7 @@
 #include "string_t.h"
 #include "list.h"
 #include "common.h"
+#include "gc.h"
 
 typedef struct parseEnv {
 	schemeObject_t * head;
@@ -14,7 +15,9 @@ env_append(parseEnv_t * pe, schemeObject_t * so) {
 	schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (cell == NULL) return ERR_OUT_OF_MEMORY;
 	CHKERROR(schemeObject_new_cons2(cell, so))
+	CHKERROR(gc_ref(&so->gcInfo))
 	*pe->tailnext = cell;
+	CHKERROR(gc_ref(&cell->gcInfo))
 	pe->tailnext = &(cell->value.consValue.next);
 	return ERR_SUCCESS;
 }
@@ -72,7 +75,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 			}
 		} else {
 			if(current == NULL) // mono symbol.
-				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL; else goto L_END;
+				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL; else {CHKERROR(gc_ref(&(so->gcInfo))) goto L_END;}
 			if(ot.tokenKind == TOKEN_PAREN_CLOSE) {
 				PARSE_POP
 				while(current->quote) PARSE_POP // when '( ...

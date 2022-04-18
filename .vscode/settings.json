@@ -29,6 +29,7 @@
         "variant": "c",
         "__functional_base_03": "c",
         "utility": "c",
-        "schemeobject_t.h": "c"
+        "schemeobject_t.h": "c",
+        "list.h": "c"
     }
 }
