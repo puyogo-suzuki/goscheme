@@ -27,6 +27,7 @@ addfunc(environment_t * out, char * name, size_t name_length, error_t(*func)(str
 	if (obj == NULL) return ERR_OUT_OF_MEMORY;
 	schemeObject_new_extFunc(obj, out, func);
 	environment_register(out, str, obj);
+	return ERR_SUCCESS;
 }
 
 error_t
