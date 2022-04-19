@@ -68,6 +68,31 @@ schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
 	return listLength == i;
 }
 
+error_t
+schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+	if (!schemeObject_isListLimited(val, 2)) {
+		errorOut("ERROR", "cons", "cons requires 2 arguments.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	schemeObject_t * carres = NULL, * cdrres = NULL, * cadrres = NULL, * carevalres = NULL, * cadrevalres = NULL;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	CHKERROR(schemeObject_car(val, &carres))
+	CHKERROR(schemeObject_cdr(val, &cdrres))
+	CHKERROR(gc_deref_schemeObject(val))
+	CHKERROR(schemeObject_car(cdrres, &cadrres))
+	CHKERROR(gc_deref_schemeObject(cdrres))
+	CHKERROR(machine_eval(self, env, &carevalres, carres))
+	CHKERROR(gc_deref_schemeObject(carres))
+	CHKERROR(machine_eval(self, env, &cadrevalres, cadrres))
+	CHKERROR(gc_deref_schemeObject(cadrres))
+	*out = reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if (*out == NULL) return ERR_OUT_OF_MEMORY;
+	CHKERROR(schemeObject_new_cons(*out, carevalres, cadrevalres))
+	// carevalres, cadrevalresはconsでref incrementしないので，ref decrementしない．
+	// *out が参照しているので，それぞれ1ずつあり，うまくいくはずである．
+	CHKERROR(gc_ref(&((*out)->gcInfo)))
+	return ERR_SUCCESS;
+}
 
 error_t
 schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {

@@ -8,6 +8,7 @@ gcInfo_new(gcInfo_t * out) {
     *out = 0;
 }
 
+// deref‚Á‚Ä‹tQÆ‚¶‚á[‚ñ‚Á‚Äv‚Á‚Ä‚é‚¯‚Ç‚à‚¤‘‚¢‚Ä‚µ‚Ü‚Á‚Ä‚é‚©‚çSHOGANAI
 error_t
 gc_deref_schemeObject(struct schemeObject * self) {
     linkedList_t * ll = NULL;

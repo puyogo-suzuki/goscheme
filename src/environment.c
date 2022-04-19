@@ -45,7 +45,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote));
 	CHKERROR(addfunc(out, "car", 3, schemeObject_car2));
 	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2));
-
+	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons));
 	return ERR_SUCCESS;
 }
 

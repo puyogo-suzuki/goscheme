@@ -51,6 +51,7 @@ schemeObject_isList(schemeObject_t * self);
 bool
 schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
 
+error_t schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
 error_t schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
