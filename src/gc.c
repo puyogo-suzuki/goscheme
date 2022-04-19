@@ -11,7 +11,11 @@ gcInfo_new(gcInfo_t * out) {
 error_t
 gc_deref_schemeObject(struct schemeObject * self) {
     linkedList_t * ll = NULL;
-    schemeObject_t * current;
+    schemeObject_t * current = NULL;
+    if (self->gcInfo > 1) {
+        self->gcInfo--;
+        return ERR_SUCCESS;
+    }
     bool perror_OOMRecoverByFreeing = error_OOMRecoverByFreeing;
     error_OOMRecoverByFreeing = false;
     CHKERROR(linkedList_add2(&ll, &self, schemeObject_t *))
