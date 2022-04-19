@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#include <stdio.h>
 
 static bool error_OOMRecoverByFreeing = true;
 
@@ -17,3 +18,8 @@ typedef enum {
 } error_t;
 
 #define CHKERROR(act) { error_t result_error = (act); if(result_error != ERR_SUCCESS) return result_error; }
+
+inline void
+errorOut(char * errorLevel, char * moduleName, char * message) {
+	fprintf(stderr, "[%s] %s: %s\n", errorLevel, moduleName, message);
+}

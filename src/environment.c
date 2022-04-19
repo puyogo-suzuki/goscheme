@@ -50,20 +50,23 @@ environment_new_global(environment_t * out)
 }
 
 bool
-comp(hashItem_t * hi, string_t * str)
-{
+comp(hashItem_t * hi, string_t * str) {
 	return string_equals(&(hi->name), str);
 }
 
 bool
-environment_getObject(environment_t * self, schemeObject_t ** outValue, string_t * str)
-{
+environment_getObject(environment_t * self, schemeObject_t ** outValue, string_t * str) {
 	hashItem_t * hi;
-	bool ret = hashtable_get(&(self->env), (void **)&hi, str, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp);
-	if (!ret) return false;
+	while (self != NULL) {
+		if (hashtable_get(&(self->env), (void **)&hi, str, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp))
+			goto L_FOUND;
+		self = self->parent;
+	}
+	return false;
+L_FOUND:
 	*outValue = hi->value;
 	CHKERROR(gc_ref(&((*outValue)->gcInfo)))
-	return ret;
+	return true;
 }
 
 error_t
@@ -83,21 +86,21 @@ error_t
 environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cdrres = NULL;
-	string_t s = {};
+	string_t s = {0};
 	CHKERROR(gc_ref(&(val->gcInfo)))
+	if (!schemeObject_isListLimited(val, 2)) {
+		errorOut("ERROR", "define", "requires 2 - length list.");
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	CHKERROR(schemeObject_car(val, &car))
 	if (car->kind != SCHEME_OBJECT_SYMBOL) {
+		errorOut("ERROE", "define", "1st argument must be symbol.");
 		CHKERROR(gc_deref_schemeObject(car))
 		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
 	CHKERROR(schemeObject_cdr(val, &cdr))
-	if(cdr == NULL) { // TODO:more contract.
-		printf("define: requires 2-length list.\n");
-		CHKERROR(gc_deref_schemeObject(car))
-		CHKERROR(gc_deref_schemeObject(val))
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
-	}
 	CHKERROR(machine_eval(self, env, &cdrres, cdr->value.consValue.value))
 	CHKERROR(gc_deref_schemeObject(cdr))
 	CHKERROR(string_copy(&s, &car->value.strValue))

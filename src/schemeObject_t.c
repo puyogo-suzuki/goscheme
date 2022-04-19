@@ -70,9 +70,11 @@ schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
 
 
 error_t
-schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
-{
-	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
+	if (self->kind != SCHEME_OBJECT_CONS) {
+		errorOut("ERROR", "car", "car requires CONS cell.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	*out = self->value.consValue.value;
 	if(*out != NULL) CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
@@ -80,7 +82,10 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out)
 
 error_t
 schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
-	if(!schemeObject_isListLimited(val, 1)) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	if (!schemeObject_isListLimited(val, 1)) {
+		errorOut("ERROR", "car", "car requires 1 argument which is CONS cell.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	schemeObject_t * carres = NULL, * evalres = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
@@ -94,9 +99,11 @@ schemeObject_car2(struct machine * self, struct environment * env, schemeObject_
 
 
 error_t
-schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
-{
-	if (self->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
+	if (self->kind != SCHEME_OBJECT_CONS) {
+		errorOut("ERROR", "cdr", "cdr requires CONS cell.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	*out = self->value.consValue.next;
 	if(*out != NULL) CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;
@@ -104,7 +111,10 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out)
 
 error_t
 schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
-	if(!schemeObject_isListLimited(val, 1)) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	if (!schemeObject_isListLimited(val, 1)) {
+		errorOut("ERROR", "cdr", "cdr requires 1 argument which is CONS cell.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	schemeObject_t * carres = NULL, * evalres = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
@@ -119,7 +129,10 @@ schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_
 
 error_t
 schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
-	if (val->kind != SCHEME_OBJECT_CONS) return ERR_EVAL_INVALID_OBJECT_TYPE;
+	if (!schemeObject_isListLimited(val, 1)) {
+		errorOut("ERROR", "quote", "quote requires 1 argument.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
 	*out = val->value.consValue.value;
 	CHKERROR(gc_ref(&((*out)->gcInfo)))
 	return ERR_SUCCESS;

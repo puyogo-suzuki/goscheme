@@ -17,7 +17,7 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t ** out, schem
 	switch (obj->kind) {
 	case SCHEME_OBJECT_SYMBOL:
 		if (!environment_getObject(env, out, &(obj->value.symValue))) {
-			printf("Not found symbol: ");
+			fprintf(stderr, "[ERROR] machine_eval: Not found symbol: ");
 			string_writeLine(stdout, &(obj->value.symValue));
 			CHKERROR(gc_deref_schemeObject(obj))
 			return ERR_EVAL_NOT_FOUND_SYMBOL;
@@ -30,14 +30,14 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t ** out, schem
 		schemeObject_t * func;
 		CHKERROR(schemeObject_car(obj, &car))
 		if (car->kind != SCHEME_OBJECT_SYMBOL) {
-			printf("No-Symbol is not applicative.\n");
+			errorOut("ERROR", "machine_eval", "Not Symbol object is not applicative.");
 			CHKERROR(gc_deref_schemeObject(car))
 			CHKERROR(gc_deref_schemeObject(obj))
 			return ERR_EVAL_INVALID_OBJECT_TYPE;
 		}
 		if (!environment_getObject(env, &func, &(car->value.symValue)) || func->kind != SCHEME_OBJECT_EXTERN_FUNCTION) {
-			printf("Not found function: ");
-			string_writeLine(stdout, &(car->value.symValue));
+			fprintf(stderr, "[ERROR] machine_eval: Not found function: ");
+			string_writeLine(stderr, &(car->value.symValue));
 			CHKERROR(gc_deref_schemeObject(car))
 			CHKERROR(gc_deref_schemeObject(obj))
 			return ERR_EVAL_NOT_FOUND_SYMBOL;
