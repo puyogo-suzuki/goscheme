@@ -3,6 +3,7 @@
 #include "string_t.h"
 #include "gc.h"
 #include <stdio.h>
+#include "io.h"
 
 typedef struct hashItem {
 	string_t name;
@@ -65,6 +66,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2));
 	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons));
 	CHKERROR(addfunc(out, "lambda", 6, machine_lambda));
+	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive));
 	return ERR_SUCCESS;
 }
 
@@ -138,4 +140,51 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 	CHKERROR(gc_deref_schemeObject(val))
 	* out = car;
 	return ERR_SUCCESS;
+}
+
+
+error_t
+environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
+{
+	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * cadrres = NULL;
+	error_t ret = ERR_SUCCESS;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	if (!schemeObject_isListLimited(val, 2)) {
+		errorOut("ERROR", "define", "requires 2 - length list.");
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_car(val, &car))
+	if (car->kind != SCHEME_OBJECT_SYMBOL) {
+		errorOut("ERROE", "define", "1st argument must be symbol.");
+		CHKERROR(gc_deref_schemeObject(car))
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_cdr(val, &cdr))
+	CHKERROR(schemeObject_car(cdr, &cadr))
+	CHKERROR(machine_eval(self, env, cadr, &cadrres)) // cadrres.rc++;
+	hashItem_t * hi;
+	environment_t * current = env;
+	while(current != NULL) {
+		bool ret = hashtable_get(&(current->env), (void **)&hi, &car->value.strValue, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp);
+		if (ret) {
+			if(hi->value != SCHEME_OBJECT_NILL)
+				CHKERROR(gc_deref_schemeObject(hi->value))
+			memcpy(&(hi->value), &cadrres, sizeof(schemeObject_t *));
+			break;
+		}
+		current = current->parent;
+	}
+	if(current == NULL) {
+		fprintf(stderr, "[ERROR] set!: Not found name:");
+		string_writeLine(stderr, &car->value.strValue);
+		ret = ERR_EVAL_NOT_FOUND_SYMBOL;
+		CHKERROR(gc_deref_schemeObject(cadrres));
+	}
+	CHKERROR(gc_deref_schemeObject(cadr))
+	CHKERROR(gc_deref_schemeObject(cdr))
+	CHKERROR(gc_deref_schemeObject(val))
+	* out = car;
+	return ret;
 }
