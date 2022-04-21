@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <string_t.h>
+#include "string_t.h"
 //#include "machine.h" <- cyclic reference!
 //#include "environment.h" <- cyclic reference!
 #include "error.h"

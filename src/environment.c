@@ -4,6 +4,7 @@
 #include "gc.h"
 #include <stdio.h>
 #include "io.h"
+#include "schemeObject_predefined_object.h"
 
 typedef struct hashItem {
 	string_t name;
@@ -47,8 +48,16 @@ addfunc(environment_t * out, char * name, size_t name_length, error_t(*func)(str
 	string_new_deep(&str, name, name_length);
 	schemeObject_t * obj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (obj == NULL) return ERR_OUT_OF_MEMORY;
-	schemeObject_new_extFunc(obj, out, func);
-	CHKERROR(gc_ref(&(out->gcInfo)))
+	schemeObject_new_extFunc(obj, NULL, func);
+	CHKERROR(gc_ref(&(obj->gcInfo)))
+	environment_register(out, str, obj);
+	return ERR_SUCCESS;
+}
+
+error_t
+addsymbol(environment_t * out, char * name, size_t name_length, schemeObject_t * obj) {
+	string_t str;
+	string_new_deep(&str, name, name_length);
 	CHKERROR(gc_ref(&(obj->gcInfo)))
 	environment_register(out, str, obj);
 	return ERR_SUCCESS;
@@ -60,13 +69,15 @@ environment_new_global(environment_t * out)
 	CHKERROR(environment_new(out, NULL))
 	CHKERROR(gc_ref(&(out->gcInfo)))
 	// TODO:Implement buildin function.
-	CHKERROR(addfunc(out, "define", 6, environment_setq));
-	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote));
-	CHKERROR(addfunc(out, "car", 3, schemeObject_car2));
-	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2));
-	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons));
-	CHKERROR(addfunc(out, "lambda", 6, machine_lambda));
-	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive));
+	CHKERROR(addfunc(out, "define", 6, environment_setq))
+	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote))
+	CHKERROR(addfunc(out, "car", 3, schemeObject_car2))
+	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2))
+	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons))
+	CHKERROR(addfunc(out, "lambda", 6, machine_lambda))
+	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive))
+	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
+	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))
 	return ERR_SUCCESS;
 }
 
