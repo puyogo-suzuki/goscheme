@@ -95,6 +95,8 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 	hashItem_t * hi;
 	bool ret = hashtable_get(&(self->env), (void **)&hi, &name, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp);
 	if (ret) {
+		if(hi->value != SCHEME_OBJECT_NILL)
+			CHKERROR(gc_deref_schemeObject(hi->value))
 		memcpy(hi, &newhi, sizeof(hashItem_t));
 		return ERR_SUCCESS;
 	}
@@ -102,10 +104,19 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 }
 
 error_t
+environment_setq2(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
+	schemeObject_t * valres = NULL;
+	string_t s;
+	CHKERROR(machine_eval(self, env, val, &valres)) // valres.rc++;
+	string_copy(&s, name);
+	CHKERROR(environment_register(env, s, valres))
+	return ERR_SUCCESS;
+}
+
+error_t
 environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
 {
-	schemeObject_t * car = NULL, * cdr = NULL, * cdrres = NULL;
-	string_t s = {0};
+	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	if (!schemeObject_isListLimited(val, 2)) {
 		errorOut("ERROR", "define", "requires 2 - length list.");
@@ -120,14 +131,11 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
 	CHKERROR(schemeObject_cdr(val, &cdr))
-	CHKERROR(machine_eval(self, env, &cdrres, cdr->value.consValue.value))
+	CHKERROR(schemeObject_car(cdr, &cadr))
+	CHKERROR(environment_setq2(self, env, &car->value.strValue, cadr))
+	CHKERROR(gc_deref_schemeObject(cadr))
 	CHKERROR(gc_deref_schemeObject(cdr))
-	CHKERROR(string_copy(&s, &car->value.strValue))
-	CHKERROR(gc_deref_schemeObject(car))
-	CHKERROR(environment_register(env, s, cdrres))
-	CHKERROR(gc_ref(&(cdrres->gcInfo)))
 	CHKERROR(gc_deref_schemeObject(val))
-	// cdrresはevalで1度gc_ref済み
-	* out = cdrres;
+	* out = car;
 	return ERR_SUCCESS;
 }

@@ -74,6 +74,9 @@ error_t schemeObject_car2(struct machine * self, struct environment * env, schem
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
 error_t schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
+error_t
+schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, error_t (mapper)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
+
 error_t schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
 error_t schemeObject_toString(string_t * out, schemeObject_t * inobj);

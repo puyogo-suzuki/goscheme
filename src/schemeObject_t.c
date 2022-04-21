@@ -157,9 +157,9 @@ schemeObject_cons(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_deref_schemeObject(val))
 	CHKERROR(schemeObject_car(cdrres, &cadrres))
 	CHKERROR(gc_deref_schemeObject(cdrres))
-	CHKERROR(machine_eval(self, env, &carevalres, carres))
+	CHKERROR(machine_eval(self, env, carres, &carevalres))
 	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(machine_eval(self, env, &cadrevalres, cadrres))
+	CHKERROR(machine_eval(self, env, cadrres, &cadrevalres))
 	CHKERROR(gc_deref_schemeObject(cadrres))
 	*out = reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (*out == NULL) return ERR_OUT_OF_MEMORY;
@@ -191,7 +191,7 @@ schemeObject_car2(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
 	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_eval(self, env, &evalres, carres))
+	CHKERROR(machine_eval(self, env, carres, &evalres))
 	CHKERROR(gc_deref_schemeObject(carres))
 	CHKERROR(schemeObject_car(evalres, out))
 	CHKERROR(gc_deref_schemeObject(evalres))
@@ -220,10 +220,31 @@ schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
 	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_eval(self, env, &evalres, carres))
+	CHKERROR(machine_eval(self, env, carres, &evalres))
 	CHKERROR(gc_deref_schemeObject(carres))
 	CHKERROR(schemeObject_cdr(evalres, out))
 	CHKERROR(gc_deref_schemeObject(evalres))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, error_t (mapper)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+	schemeObject_t ** writeTo = out;
+	schemeObject_t * readFrom = inobj;
+	*out = SCHEME_OBJECT_NILL;
+	while(readFrom != SCHEME_OBJECT_NILL) {
+		if(readFrom->kind != SCHEME_OBJECT_CONS) {
+			errorOut("ERROR", "map", "must be LIST");
+			return ERR_EVAL_INVALID_OBJECT_TYPE;
+		}
+		*writeTo = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+		if(*writeTo == NULL) return ERR_OUT_OF_MEMORY;
+		CHKERROR(schemeObject_new_cons2(*writeTo, SCHEME_OBJECT_NILL))
+		CHKERROR(gc_ref(&(*writeTo)->gcInfo))
+		CHKERROR(mapper(self, env, readFrom->value.consValue.value, &(*writeTo)->value.consValue.value))
+		writeTo = &((*writeTo)->value.consValue.next);
+		readFrom = readFrom->value.consValue.next;
+	}
 	return ERR_SUCCESS;
 }
 

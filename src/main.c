@@ -17,7 +17,7 @@ int main(void) {
         schemeObject_t * so, * res;
         if (parse(&so, &t)) printf("parse fail\n");
         else {
-            if (machine_eval(&vm, &(vm.env), &res, so)) printf("eval fail\n");
+            if (machine_eval(&vm, &(vm.env), so, &res)) printf("eval fail\n");
             else {
                 schemeObject_toString(&str, res);
                 string_writeLine(stdout, &str);
