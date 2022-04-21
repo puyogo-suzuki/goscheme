@@ -8,7 +8,7 @@ gcInfo_new(gcInfo_t * out) {
     *out = 0;
 }
 
-// deref‚Á‚Ä‹tŽQÆ‚¶‚á[‚ñ‚Á‚ÄŽv‚Á‚Ä‚é‚¯‚Ç‚à‚¤‘‚¢‚Ä‚µ‚Ü‚Á‚Ä‚é‚©‚çSHOGANAI
+// derefã£ã¦é€†å‚ç…§ã˜ã‚ƒãƒ¼ã‚“ã£ã¦æ€ã£ã¦ã‚‹ã‘ã©ã‚‚ã†æ›¸ã„ã¦ã—ã¾ã£ã¦ã‚‹ã‹ã‚‰SHOGANAI
 error_t
 gc_deref_schemeObject(struct schemeObject * self) {
     linkedList_t * ll = NULL;
@@ -42,6 +42,11 @@ gc_deref_schemeObject(struct schemeObject * self) {
                 case SCHEME_OBJECT_EXTERN_FUNCTION:
                     if(me->value.extFuncValue.environment != NULL)
                         gc_deref_environment(me->value.extFuncValue.environment);
+                    break;
+                case SCHEME_OBJECT_PROCEDURE:
+                    if(me->value.procedureValue.environment != NULL)
+                        gc_deref_environment(me->value.procedureValue.environment);
+                    current = me->value.procedureValue.body;
                     break;
             }
             free(me);

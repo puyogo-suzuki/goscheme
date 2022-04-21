@@ -15,7 +15,7 @@ env_append(parseEnv_t * pe, schemeObject_t * so) {
 	schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (cell == NULL) return ERR_OUT_OF_MEMORY;
 	CHKERROR(schemeObject_new_cons2(cell, so))
-	CHKERROR(gc_ref(&so->gcInfo))
+	if(so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
 	*pe->tailnext = cell;
 	CHKERROR(gc_ref(&cell->gcInfo))
 	pe->tailnext = &(cell->value.consValue.next);

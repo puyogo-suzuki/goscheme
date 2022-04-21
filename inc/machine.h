@@ -10,3 +10,6 @@ machine_new(machine_t * out);
 
 error_t
 machine_eval(machine_t * self, environment_t * env, schemeObject_t ** out, schemeObject_t * obj);
+
+error_t
+machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);

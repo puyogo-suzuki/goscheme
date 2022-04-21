@@ -29,6 +29,10 @@ linkedList_new(linkedList_t ** out, size_t size);
 error_t
 linkedList_new3(linkedList_t ** out, void * value, size_t size);
 error_t
+linkedList_copy(linkedList_t ** out, linkedList_t * inlist, size_t size);
+error_t
+linkedList_foreach(linkedList_t * self, error_t (action)(void *));
+error_t
 linkedList_add(linkedList_t ** out, void * value, size_t size);
 void
 linkedList_free(linkedList_t * out);

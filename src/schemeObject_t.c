@@ -46,6 +46,82 @@ schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment,
 	return ERR_SUCCESS;
 }
 
+error_t
+schemeObject_new_procedure(schemeObject_t * out, struct environment * environment, schemeObject_t * body) {
+	out->kind = SCHEME_OBJECT_PROCEDURE;
+	out->value.procedureValue.environment = environment;
+	out->value.procedureValue.body = body;
+	gcInfo_new(&out->gcInfo);
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj) {
+	if(inobj == SCHEME_OBJECT_NILL) {
+		*out = SCHEME_OBJECT_NILL;
+		return ERR_SUCCESS;
+	}
+	*out = (schemeObject_t *) reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if(*out == NULL) return ERR_OUT_OF_MEMORY;
+	gcInfo_new(&((*out)->gcInfo));
+	(*out)->kind = inobj->kind;
+	(*out)->value = inobj->value;
+	switch(inobj->kind) {
+		case SCHEME_OBJECT_CONS:
+		case SCHEME_OBJECT_NUMBER:
+			break;
+		case SCHEME_OBJECT_EXTERN_FUNCTION:
+			if(inobj->value.extFuncValue.environment != NULL)
+				gc_ref(&(inobj->value.extFuncValue.environment->gcInfo));
+			break;
+		case SCHEME_OBJECT_PROCEDURE:
+			if(inobj->value.procedureValue.environment != NULL)
+				gc_ref(&(inobj->value.procedureValue.environment->gcInfo));
+			if(inobj->value.procedureValue.body != SCHEME_OBJECT_NILL)
+				gc_ref(&(inobj->value.procedureValue.body->gcInfo));
+			break;
+		case SCHEME_OBJECT_SYMBOL:
+			string_copy(&((*out)->value.symValue), &inobj->value.symValue);
+			break;
+		case SCHEME_OBJECT_STRING:
+			string_copy(&((*out)->value.strValue), &inobj->value.strValue);
+			break;
+	}
+	return ERR_SUCCESS;
+}
+
+typedef struct clone_env {
+	schemeObject_t ** writeTo;
+	schemeObject_t * readFrom;
+} clone_env_t;
+
+error_t
+schemeObject_copy(schemeObject_t ** out, schemeObject_t * inobj) { // *out's reference count is 1.
+	if(inobj == SCHEME_OBJECT_NILL) {
+		*out = SCHEME_OBJECT_NILL;
+		return ERR_SUCCESS;
+	}
+	if(inobj->kind != SCHEME_OBJECT_CONS) // fast path.
+		return schemeObject_copy_onedepth(out, inobj);
+	clone_env_t env = {out, inobj};
+	linkedList_t * envStack = NULL;
+	CHKERROR(linkedList_add2(&envStack, &env, clone_env_t))
+	while(linkedList_pop2(&envStack, &env, clone_env_t)) {
+		while(env.readFrom != NULL) {
+			schemeObject_copy_onedepth(env.writeTo, env.readFrom);
+			CHKERROR(gc_ref(&((*env.writeTo)->gcInfo)))
+			if(env.readFrom->kind == SCHEME_OBJECT_CONS) {
+				clone_env_t newenv = {&((*env.writeTo)->value.consValue.next), env.readFrom->value.consValue.next};
+				CHKERROR(linkedList_add2(&envStack, &newenv, clone_env_t))
+				env.writeTo = &((*env.writeTo)->value.consValue.value);
+				env.readFrom = env.readFrom->value.consValue.value;
+				continue;
+			}
+			break;
+		}
+	}
+	return ERR_SUCCESS;
+}
 
 bool
 schemeObject_isList(schemeObject_t * self) {
@@ -217,7 +293,10 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					break;
 				}
 				case SCHEME_OBJECT_EXTERN_FUNCTION:
-					CHKERROR(stringBuilder_append(&sb, "<FUNCTION>", 10))
+					CHKERROR(stringBuilder_append(&sb, "<EXTFUNCT>", 10))
+					goto CONTINUE_OUTER_WHILE;
+				case SCHEME_OBJECT_PROCEDURE:
+					CHKERROR(stringBuilder_append(&sb, "<PROCEDURE>", 11))
 					goto CONTINUE_OUTER_WHILE;
 			}
 		}

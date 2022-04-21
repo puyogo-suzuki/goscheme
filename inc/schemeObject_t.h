@@ -17,7 +17,8 @@ typedef enum schemeObject_kind {
 	SCHEME_OBJECT_STRING,
 	SCHEME_OBJECT_NUMBER,
 	SCHEME_OBJECT_CONS,
-	SCHEME_OBJECT_EXTERN_FUNCTION
+	SCHEME_OBJECT_EXTERN_FUNCTION,
+	SCHEME_OBJECT_PROCEDURE
 } schemeObject_kind_t;
 
 typedef struct schemeObject {
@@ -35,16 +36,32 @@ typedef struct schemeObject {
 			struct environment * environment; // closure
 			error_t (*func)(struct machine *, struct environment * env, struct schemeObject *, struct schemeObject **);
 		} extFuncValue;
+		struct {
+			struct environment * environment;
+			struct schemeObject * body;
+		} procedureValue;
 	} value;
 } schemeObject_t;
 
 #define schemeObject_new_cons2(out, value) schemeObject_new_cons(out, value, SCHEME_OBJECT_NILL)
 
-error_t schemeObject_new_string(schemeObject_t * out, string_t str);
-error_t schemeObject_new_number(schemeObject_t * out, int32_t num);
-error_t schemeObject_new_symbol(schemeObject_t * out, string_t sym);
-error_t schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
-error_t schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
+error_t 
+schemeObject_new_string(schemeObject_t * out, string_t str);
+error_t 
+schemeObject_new_number(schemeObject_t * out, int32_t num);
+error_t 
+schemeObject_new_symbol(schemeObject_t * out, string_t sym);
+error_t 
+schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
+error_t
+schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
+error_t
+schemeObject_new_procedure(schemeObject_t * out, struct environment * environment, schemeObject_t * body);
+
+error_t
+schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj);
+error_t
+schemeObject_copy(schemeObject_t ** out, schemeObject_t * inobj);
 
 bool
 schemeObject_isList(schemeObject_t * self);

@@ -15,3 +15,9 @@ hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(
 
 bool
 hashtable_get(hashtable_t * self, void ** outValue, void * value, int32_t(hasher(void *)), bool(comparer(void *, void *)));
+
+error_t
+hashtable_copy(hashtable_t * dst, hashtable_t * src, size_t size);
+
+error_t
+hashtable_foreach(hashtable_t * self, error_t (action)(void *));

@@ -21,6 +21,31 @@ linkedList_new3(linkedList_t ** out, void * value, size_t size) {
 }
 
 error_t
+linkedList_copy(linkedList_t ** out, linkedList_t * inlist, size_t size) {
+	linkedList_t ** writeTo = out;
+	linkedList_t * readFrom = inlist;
+	while(readFrom != LINKEDLIST_TERMINATOR) {
+		*writeTo = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
+		if(*writeTo == NULL) return ERR_OUT_OF_MEMORY;
+		(*writeTo)->next = LINKEDLIST_TERMINATOR;
+		memcpy(&((*writeTo)->value), &(readFrom->value), size);
+		readFrom = readFrom->next;
+		writeTo = &((*writeTo)->next);
+	}
+	return ERR_SUCCESS;
+}
+
+error_t
+linkedList_foreach(linkedList_t * self, error_t (action)(void *)) {
+	linkedList_t * current = self;
+	while(current != LINKEDLIST_TERMINATOR) {
+		CHKERROR(action(&(current->value)))
+		current = current->next;
+	}
+	return ERR_SUCCESS;
+}
+
+error_t
 linkedList_add(linkedList_t ** out, void * value, size_t size) {
 	linkedList_t * prev = *out;
 	CHKERROR(linkedList_new3(out, value, size))

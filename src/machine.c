@@ -56,3 +56,23 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t ** out, schem
 		return ERR_SUCCESS;
 	}
 }
+
+error_t
+machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out) {
+	if(!schemeObject_isList(val)) {
+		errorOut("ERROR", "lambda", "argument must be list.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	*out = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if(*out == NULL) return ERR_OUT_OF_MEMORY;
+	environment_t * copyenv = (environment_t *)reallocarray(NULL, 1, sizeof(environment_t));
+	if(copyenv == NULL) return ERR_OUT_OF_MEMORY;
+	CHKERROR(environment_clone(copyenv, env))
+	CHKERROR(gc_ref(&(copyenv->gcInfo)))
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	CHKERROR(schemeObject_new_procedure(*out, copyenv, val))
+	CHKERROR(gc_deref_schemeObject(val))
+	CHKERROR(gc_ref(&((*out)->gcInfo)))
+	return ERR_SUCCESS;
+}

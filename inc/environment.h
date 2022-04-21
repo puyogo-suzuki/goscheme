@@ -17,6 +17,9 @@ environment_new(environment_t * out, environment_t * parent);
 error_t
 environment_new_global(environment_t * out);
 
+error_t
+environment_clone(environment_t * out, environment_t * inenv);
+
 bool
 environment_getObject(environment_t * self, schemeObject_t ** outValue, string_t * str);
 

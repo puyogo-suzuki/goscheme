@@ -15,11 +15,29 @@ hashing(hashItem_t * hi) {
 }
 
 error_t
-environment_new(environment_t * out, environment_t * parent)
-{
+environment_new(environment_t * out, environment_t * parent) {
 	out->parent = parent;
 	gcInfo_new(&out->gcInfo);
 	return hashtable_new(&(out->env));
+}
+
+error_t
+copyaction(hashItem_t * inplace) {
+	schemeObject_t * sobj = inplace->value;
+	string_t s = inplace->name;
+	CHKERROR(schemeObject_copy(&(inplace->value), sobj))
+	CHKERROR(string_copy(&(inplace->name), &s))
+	return ERR_SUCCESS;
+}
+
+error_t
+environment_clone(environment_t * out, environment_t * inenv) {
+	environment_new(out, inenv->parent);
+	if(inenv->parent != NULL)
+		CHKERROR(gc_ref(&(inenv->parent->gcInfo)))
+	CHKERROR(hashtable_copy(&(out->env), &(inenv->env), sizeof(schemeObject_t)))
+	CHKERROR(hashtable_foreach(&(out->env), (error_t (*)(void *)) copyaction));
+	return ERR_SUCCESS;
 }
 
 error_t
@@ -46,6 +64,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "car", 3, schemeObject_car2));
 	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2));
 	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons));
+	CHKERROR(addfunc(out, "lambda", 6, machine_lambda));
 	return ERR_SUCCESS;
 }
 
