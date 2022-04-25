@@ -43,6 +43,7 @@ machine_lambdaexec(machine_t * self, environment_t * env, schemeObject_t ** out,
 	the_env = (environment_t *)reallocarray(NULL, 1, sizeof(environment_t));
 	if(the_env == NULL) return ERR_OUT_OF_MEMORY;
 	CHKERROR(environment_new(the_env, env))
+	CHKERROR(gc_ref(&(env->gcInfo)))
 	CHKERROR(gc_ref(&(the_env->gcInfo)))
 	schemeObject_t * current_arg = arg, * current_car = car;
 	while(1) {
