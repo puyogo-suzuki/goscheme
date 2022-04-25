@@ -38,7 +38,7 @@ schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject
 }
 
 error_t
-schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, schemeFunction_t * func) {
 	out->kind = SCHEME_OBJECT_EXTERN_FUNCTION;
 	out->value.extFuncValue.environment = environment;
 	out->value.extFuncValue.func = func;
@@ -228,7 +228,7 @@ schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_
 }
 
 error_t
-schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, error_t (mapper)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper) {
 	schemeObject_t ** writeTo = out;
 	schemeObject_t * readFrom = inobj;
 	*out = SCHEME_OBJECT_NILL;

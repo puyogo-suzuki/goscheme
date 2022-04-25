@@ -10,7 +10,8 @@ struct environment;
 struct machine;
 
 #define SCHEME_OBJECT_NILL NULL
-
+// current machine, current environment, input arguments, output.
+typedef error_t schemeFunction_t(struct machine *, struct environment * env, struct schemeObject *, struct schemeObject **);
 
 typedef enum schemeObject_kind {
 	SCHEME_OBJECT_SYMBOL,
@@ -34,7 +35,7 @@ typedef struct schemeObject {
 		} consValue;
 		struct {
 			struct environment * environment; // closure
-			error_t (*func)(struct machine *, struct environment * env, struct schemeObject *, struct schemeObject **);
+			schemeFunction_t * func;
 		} extFuncValue;
 		struct {
 			struct environment * environment;
@@ -54,7 +55,7 @@ schemeObject_new_symbol(schemeObject_t * out, string_t sym);
 error_t 
 schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next);
 error_t
-schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, error_t (*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
+schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, schemeFunction_t * func);
 error_t
 schemeObject_new_procedure(schemeObject_t * out, struct environment * environment, schemeObject_t * body);
 
@@ -75,7 +76,7 @@ error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
 error_t schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
 error_t
-schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, error_t (mapper)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **));
+schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper);
 
 error_t schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 
