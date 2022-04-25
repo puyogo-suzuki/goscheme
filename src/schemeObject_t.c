@@ -265,6 +265,10 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 	linkedList_add2(&stack, &inobj, schemeObject_t *);
 	CHKERROR(stringBuilder_new(&sb))
 	schemeObject_t * cur = inobj;
+	if(cur == SCHEME_OBJECT_NILL) {
+		CHKERROR(stringBuilder_append(&sb, "'()", 3))
+		goto L_END;
+	}
 	if(cur->kind == SCHEME_OBJECT_CONS) {
 		CHKERROR(stringBuilder_append(&sb, "(", 1))
 		cur = cur->value.consValue.value;
