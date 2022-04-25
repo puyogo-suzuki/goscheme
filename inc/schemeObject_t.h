@@ -72,11 +72,14 @@ schemeObject_isList(schemeObject_t * self);
 bool
 schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
 
-DECL_SCHEMEFUNC(schemeObject_cons);
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
-DECL_SCHEMEFUNC(schemeObject_car2);
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
-DECL_SCHEMEFUNC(schemeObject_cdr2);
+error_t schemeObject_cadr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_cddr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_caddr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_cdddr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_cadddr(schemeObject_t * self, schemeObject_t ** out);
+error_t schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out);
 
 error_t
 schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper);

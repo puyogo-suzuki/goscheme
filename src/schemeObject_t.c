@@ -145,37 +145,8 @@ schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
 }
 
 error_t
-schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * outobj;
-	if (!schemeObject_isListLimited(val, 2)) {
-		errorOut("ERROR", "cons", "cons requires 2 arguments.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
-	}
-	schemeObject_t * carres = NULL, * cdrres = NULL, * cadrres = NULL, * carevalres = NULL, * cadrevalres = NULL;
-	CHKERROR(gc_ref(&(val->gcInfo)))
-	CHKERROR(schemeObject_car(val, &carres))
-	CHKERROR(schemeObject_cdr(val, &cdrres))
-	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(schemeObject_car(cdrres, &cadrres))
-	CHKERROR(gc_deref_schemeObject(cdrres))
-	CHKERROR(machine_evalforce(self, env, carres, &carevalres))
-	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(machine_evalforce(self, env, cadrres, &cadrevalres))
-	CHKERROR(gc_deref_schemeObject(cadrres))
-	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-	if(outobj == NULL) return ERR_OUT_OF_MEMORY;
-	CHKERROR(schemeObject_new_cons(outobj, carevalres, cadrevalres))
-	// carevalres, cadrevalresはconsでref incrementしないので，ref decrementしない．
-	// *out が参照しているので，それぞれ1ずつあり，うまくいくはずである．
-	CHKERROR(gc_ref(&(outobj->gcInfo)))
-	out->kind = EVALUATIONRESULT_EVALUATED;
-	out->value.evaluatedValue = outobj;
-	return ERR_SUCCESS;
-}
-
-error_t
 schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
-	if (self->kind != SCHEME_OBJECT_CONS) {
+	if(self == SCHEME_OBJECT_NILL || self->kind != SCHEME_OBJECT_CONS) {
 		errorOut("ERROR", "car", "car requires CONS cell.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
@@ -185,29 +156,8 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
 }
 
 error_t
-schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * outobj;
-	if (!schemeObject_isListLimited(val, 1)) {
-		errorOut("ERROR", "car", "car requires 1 argument which is CONS cell.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
-	}
-	schemeObject_t * carres = NULL, * evalres = NULL;
-	CHKERROR(gc_ref(&(val->gcInfo)))
-	CHKERROR(schemeObject_car(val, &carres))
-	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_evalforce(self, env, carres, &evalres))
-	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(schemeObject_car(evalres, &outobj))
-	CHKERROR(gc_deref_schemeObject(evalres))
-	out->kind = EVALUATIONRESULT_EVALUATED;
-	out->value.evaluatedValue = outobj;
-	return ERR_SUCCESS;
-}
-
-
-error_t
 schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
-	if (self->kind != SCHEME_OBJECT_CONS) {
+	if (self == SCHEME_OBJECT_NILL || self->kind != SCHEME_OBJECT_CONS) {
 		errorOut("ERROR", "cdr", "cdr requires CONS cell.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
@@ -217,22 +167,56 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
 }
 
 error_t
-schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * outobj;
-	if (!schemeObject_isListLimited(val, 1)) {
-		errorOut("ERROR", "cdr", "cdr requires 1 argument which is CONS cell.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
-	}
-	schemeObject_t * carres = NULL, * evalres = NULL;
-	CHKERROR(gc_ref(&(val->gcInfo)))
-	CHKERROR(schemeObject_car(val, &carres))
-	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_evalforce(self, env, carres, &evalres))
-	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(schemeObject_cdr(evalres, &outobj))
-	CHKERROR(gc_deref_schemeObject(evalres))
-	out->kind = EVALUATIONRESULT_EVALUATED;
-	out->value.evaluatedValue = outobj;
+schemeObject_cadr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cdr;
+	CHKERROR(schemeObject_cdr(self, &cdr))
+	CHKERROR(schemeObject_car(cdr, out))
+	CHKERROR(gc_deref_schemeObject(cdr))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_cddr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cdr;
+	CHKERROR(schemeObject_cdr(self, &cdr))
+	CHKERROR(schemeObject_cdr(cdr, out))
+	CHKERROR(gc_deref_schemeObject(cdr))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_caddr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cddr;
+	CHKERROR(schemeObject_cddr(self, &cddr))
+	CHKERROR(schemeObject_car(cddr, out))
+	CHKERROR(gc_deref_schemeObject(cddr))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_cdddr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cddr;
+	CHKERROR(schemeObject_cddr(self, &cddr))
+	CHKERROR(schemeObject_cdr(cddr, out))
+	CHKERROR(gc_deref_schemeObject(cddr))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_cadddr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cdddr;
+	CHKERROR(schemeObject_cdddr(self, &cdddr))
+	CHKERROR(schemeObject_car(cdddr, out))
+	CHKERROR(gc_deref_schemeObject(cdddr))
+	return ERR_SUCCESS;
+}
+
+error_t
+schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out) {
+	schemeObject_t * cdddr;
+	CHKERROR(schemeObject_cdddr(self, &cdddr))
+	CHKERROR(schemeObject_cdr(cdddr, out))
+	CHKERROR(gc_deref_schemeObject(cdddr))
 	return ERR_SUCCESS;
 }
 

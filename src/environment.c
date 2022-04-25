@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "io.h"
 #include "schemeObject_predefined_object.h"
+#include "builtinfuncs.h"
 
 typedef struct hashItem {
 	string_t name;
@@ -71,9 +72,18 @@ environment_new_global(environment_t * out)
 	// TODO:Implement buildin function.
 	CHKERROR(addfunc(out, "define", 6, environment_setq))
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote))
-	CHKERROR(addfunc(out, "car", 3, schemeObject_car2))
-	CHKERROR(addfunc(out, "cdr", 3, schemeObject_cdr2))
-	CHKERROR(addfunc(out, "cons", 4, schemeObject_cons))
+	CHKERROR(addfunc(out, "car", 3, builtin_car))
+	CHKERROR(addfunc(out, "cdr", 3, builtin_cdr))
+	CHKERROR(addfunc(out, "cadr", 4, builtin_cadr))
+	CHKERROR(addfunc(out, "cddr", 4, builtin_cddr))
+	CHKERROR(addfunc(out, "caddr", 5, builtin_caddr))
+	CHKERROR(addfunc(out, "cdddr", 5, builtin_cdddr))
+	CHKERROR(addfunc(out, "cadddr", 6, builtin_cadddr))
+	CHKERROR(addfunc(out, "cddddr", 6, builtin_cddddr))
+
+	CHKERROR(addfunc(out, "cons", 4, builtin_cons))
+	CHKERROR(addfunc(out, "if", 2, builtin_if))
+	CHKERROR(addfunc(out, "begin", 5, machine_begin))
 	CHKERROR(addfunc(out, "lambda", 6, machine_lambda))
 	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive))
 	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
