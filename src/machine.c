@@ -70,7 +70,7 @@ machine_lambdaexec(machine_t * self, environment_t * env, evaluationResult_t * o
 			ret = ERR_EVAL_INVALID_OBJECT_TYPE;
 			goto L_FAIL;
 		}
-		CHKERROR(environment_setq2(self, the_env, &(current_car->value.consValue.value->value.symValue), current_arg->value.consValue.value))
+		CHKERROR(environment_setq3(self, the_env, &(current_car->value.consValue.value->value.symValue), current_arg->value.consValue.value))
 		current_arg = current_arg->value.consValue.next;
 		current_car = current_car->value.consValue.next;
 	}
@@ -110,6 +110,11 @@ machine_evalforce(machine_t * self, environment_t * env, schemeObject_t * val, s
 error_t
 machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
+	if(val == SCHEME_OBJECT_NILL) {
+		out->kind = EVALUATIONRESULT_EVALUATED;
+		out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+		return ERR_SUCCESS;
+	}
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	out->kind = EVALUATIONRESULT_EVALUATED;
 	switch (val->kind) {

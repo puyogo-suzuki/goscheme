@@ -13,6 +13,7 @@ error_t
 gc_deref_schemeObject(struct schemeObject * self) {
     linkedList_t * ll = NULL;
     schemeObject_t * current = NULL;
+    if(self == SCHEME_OBJECT_NILL) return ERR_SUCCESS;
     if (self->gcInfo > 1) {
         self->gcInfo--;
         return ERR_SUCCESS;

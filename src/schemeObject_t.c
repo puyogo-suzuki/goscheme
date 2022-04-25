@@ -252,7 +252,8 @@ schemeObject_quote(struct machine * self, struct environment * env, schemeObject
 	}
 	out->kind = EVALUATIONRESULT_EVALUATED;
 	out->value.evaluatedValue = val->value.consValue.value;
-	CHKERROR(gc_ref(&(out->value.evaluatedValue->gcInfo)))
+	if(out->value.evaluatedValue != SCHEME_OBJECT_NILL)
+		CHKERROR(gc_ref(&(out->value.evaluatedValue->gcInfo)))
 	
 	return ERR_SUCCESS;
 }
