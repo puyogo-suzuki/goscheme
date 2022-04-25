@@ -86,6 +86,13 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "begin", 5, machine_begin))
 	CHKERROR(addfunc(out, "lambda", 6, machine_lambda))
 	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive))
+
+	CHKERROR(addfunc(out, "null?", 5, builtin_nullp))
+	CHKERROR(addfunc(out, "number?", 7, builtin_numberp))
+	CHKERROR(addfunc(out, "symbol?", 7, builtin_symbolp))
+	CHKERROR(addfunc(out, "procedure?", 10, builtin_procedurep))
+	CHKERROR(addfunc(out, "string?", 7, builtin_stringp))
+
 	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
 	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))
 	return ERR_SUCCESS;
@@ -107,7 +114,7 @@ environment_getObject(environment_t * self, schemeObject_t ** outValue, string_t
 	return false;
 L_FOUND:
 	*outValue = hi->value;
-	CHKERROR(gc_ref(&((*outValue)->gcInfo)))
+	if(*outValue != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&((*outValue)->gcInfo)))
 	return true;
 }
 
@@ -124,6 +131,15 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 		return ERR_SUCCESS;
 	}
 	return hashtable_add(&(self->env), &newhi, sizeof(hashItem_t), (int32_t(*)(void *))hashing);
+}
+
+error_t
+environment_setq3(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
+	string_t s;
+	string_copy(&s, name);
+	if(val != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(val->gcInfo)))
+	CHKERROR(environment_register(env, s, val))
+	return ERR_SUCCESS;
 }
 
 error_t

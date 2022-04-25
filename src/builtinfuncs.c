@@ -1,5 +1,6 @@
 #include "builtinfuncs.h"
 #include "schemeObject_t.h"
+#include "gc.h"
 #include "machine.h"
 #include "common.h"
 #include "schemeObject_predefined_object.h"
@@ -90,3 +91,16 @@ ONE_ARGUMENT_FUNC(builtin_caddr, "caddr", CHKERROR(schemeObject_caddr(arg0, &out
 ONE_ARGUMENT_FUNC(builtin_cdddr, "cdddr", CHKERROR(schemeObject_cdddr(arg0, &outobj)))
 ONE_ARGUMENT_FUNC(builtin_cadddr, "cadddr", CHKERROR(schemeObject_cadddr(arg0, &outobj)))
 ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &outobj)))
+
+#define PRED_FUNC(funcname, funcname_str, pred)  ONE_ARGUMENT_FUNC(funcname, funcname_str, { \
+    outobj = (pred) ? &predefined_t : &predefined_f; \
+    CHKERROR(gc_deref_schemeObject(arg0)) \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+PRED_FUNC(builtin_numberp, "number?", arg0->kind == SCHEME_OBJECT_NUMBER)
+PRED_FUNC(builtin_stringp, "string?", arg0->kind == SCHEME_OBJECT_STRING)
+PRED_FUNC(builtin_nullp, "null?", arg0 == SCHEME_OBJECT_NILL)
+PRED_FUNC(builtin_symbolp, "symbol?", arg0->kind == SCHEME_OBJECT_SYMBOL)
+PRED_FUNC(builtin_procedurep, "procedure?", arg0->kind == SCHEME_OBJECT_PROCEDURE || arg0->kind == SCHEME_OBJECT_EXTERN_FUNCTION)
+
