@@ -145,7 +145,8 @@ schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
 }
 
 error_t
-schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
+	schemeObject_t * outobj;
 	if (!schemeObject_isListLimited(val, 2)) {
 		errorOut("ERROR", "cons", "cons requires 2 arguments.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -157,16 +158,18 @@ schemeObject_cons(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_deref_schemeObject(val))
 	CHKERROR(schemeObject_car(cdrres, &cadrres))
 	CHKERROR(gc_deref_schemeObject(cdrres))
-	CHKERROR(machine_eval(self, env, carres, &carevalres))
+	CHKERROR(machine_evalforce(self, env, carres, &carevalres))
 	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(machine_eval(self, env, cadrres, &cadrevalres))
+	CHKERROR(machine_evalforce(self, env, cadrres, &cadrevalres))
 	CHKERROR(gc_deref_schemeObject(cadrres))
-	*out = reallocarray(NULL, 1, sizeof(schemeObject_t));
-	if (*out == NULL) return ERR_OUT_OF_MEMORY;
-	CHKERROR(schemeObject_new_cons(*out, carevalres, cadrevalres))
+	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if(outobj == NULL) return ERR_OUT_OF_MEMORY;
+	CHKERROR(schemeObject_new_cons(outobj, carevalres, cadrevalres))
 	// carevalres, cadrevalresはconsでref incrementしないので，ref decrementしない．
 	// *out が参照しているので，それぞれ1ずつあり，うまくいくはずである．
-	CHKERROR(gc_ref(&((*out)->gcInfo)))
+	CHKERROR(gc_ref(&(outobj->gcInfo)))
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = outobj;
 	return ERR_SUCCESS;
 }
 
@@ -182,7 +185,8 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
 }
 
 error_t
-schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
+	schemeObject_t * outobj;
 	if (!schemeObject_isListLimited(val, 1)) {
 		errorOut("ERROR", "car", "car requires 1 argument which is CONS cell.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -191,10 +195,12 @@ schemeObject_car2(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
 	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_eval(self, env, carres, &evalres))
+	CHKERROR(machine_evalforce(self, env, carres, &evalres))
 	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(schemeObject_car(evalres, out))
+	CHKERROR(schemeObject_car(evalres, &outobj))
 	CHKERROR(gc_deref_schemeObject(evalres))
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = outobj;
 	return ERR_SUCCESS;
 }
 
@@ -211,7 +217,8 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
 }
 
 error_t
-schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
+	schemeObject_t * outobj;
 	if (!schemeObject_isListLimited(val, 1)) {
 		errorOut("ERROR", "cdr", "cdr requires 1 argument which is CONS cell.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -220,10 +227,12 @@ schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_car(val, &carres))
 	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(machine_eval(self, env, carres, &evalres))
+	CHKERROR(machine_evalforce(self, env, carres, &evalres))
 	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(schemeObject_cdr(evalres, out))
+	CHKERROR(schemeObject_cdr(evalres, &outobj))
 	CHKERROR(gc_deref_schemeObject(evalres))
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = outobj;
 	return ERR_SUCCESS;
 }
 
@@ -233,6 +242,7 @@ schemeObject_map(struct machine * self, struct environment * env, schemeObject_t
 	schemeObject_t * readFrom = inobj;
 	*out = SCHEME_OBJECT_NILL;
 	while(readFrom != SCHEME_OBJECT_NILL) {
+		evaluationResult_t evres;
 		if(readFrom->kind != SCHEME_OBJECT_CONS) {
 			errorOut("ERROR", "map", "must be LIST");
 			return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -240,8 +250,9 @@ schemeObject_map(struct machine * self, struct environment * env, schemeObject_t
 		*writeTo = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 		if(*writeTo == NULL) return ERR_OUT_OF_MEMORY;
 		CHKERROR(schemeObject_new_cons2(*writeTo, SCHEME_OBJECT_NILL))
-		CHKERROR(gc_ref(&(*writeTo)->gcInfo))
-		CHKERROR(mapper(self, env, readFrom->value.consValue.value, &(*writeTo)->value.consValue.value))
+		CHKERROR(gc_ref(&(*writeTo)->gcInfo)) // TODO: check gc ref of tail!
+		CHKERROR(mapper(self, env, readFrom->value.consValue.value, &evres))
+		CHKERROR(machine_makeforce(self, evres, &(*writeTo)->value.consValue.value))
 		writeTo = &((*writeTo)->value.consValue.next);
 		readFrom = readFrom->value.consValue.next;
 	}
@@ -250,13 +261,15 @@ schemeObject_map(struct machine * self, struct environment * env, schemeObject_t
 
 
 error_t
-schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out) {
+schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (!schemeObject_isListLimited(val, 1)) {
 		errorOut("ERROR", "quote", "quote requires 1 argument.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
-	*out = val->value.consValue.value;
-	CHKERROR(gc_ref(&((*out)->gcInfo)))
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = val->value.consValue.value;
+	CHKERROR(gc_ref(&(out->value.evaluatedValue->gcInfo)))
+	
 	return ERR_SUCCESS;
 }
 

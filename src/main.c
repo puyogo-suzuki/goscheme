@@ -15,9 +15,10 @@ int main(void) {
         string_new_shallow2(&str,  buf);
         tokenizer_t t = tokenizer_new(str);
         schemeObject_t * so, * res;
+        error_t evalerrno = ERR_SUCCESS;
         if (parse(&so, &t)) printf("parse fail\n");
         else {
-            if (machine_eval(&vm, &(vm.env), so, &res)) printf("eval fail\n");
+            if (evalerrno = machine_evalforce(&vm, &(vm.env), so, &res)) printf("eval fail : %d\n", evalerrno);
             else {
                 schemeObject_toString(&str, res);
                 string_writeLine(stdout, &str);

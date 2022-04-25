@@ -8,13 +8,14 @@
 
 struct environment;
 struct machine;
+struct evaluationResult;
 
 #define SCHEME_OBJECT_NILL NULL
 // current machine, current environment, input arguments, output.
-typedef error_t schemeFunction_t(struct machine *, struct environment * env, struct schemeObject *, struct schemeObject **);
+typedef error_t schemeFunction_t(struct machine *, struct environment * env, struct schemeObject *, struct evaluationResult *);
 
-#define DECL_SCHEMEFUNC(name) error_t name(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out)
-
+#define DECL_SCHEMEFUNC(name) error_t name(struct machine * self, struct environment * env, schemeObject_t * val, struct evaluationResult * out)
+#define DECL_SCHEMEFUNC_FORCE(name) error_t name(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out)
 typedef enum schemeObject_kind {
 	SCHEME_OBJECT_SYMBOL,
 	SCHEME_OBJECT_STRING,
@@ -71,7 +72,6 @@ schemeObject_isList(schemeObject_t * self);
 bool
 schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
 
-error_t schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
 DECL_SCHEMEFUNC(schemeObject_cons);
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
 DECL_SCHEMEFUNC(schemeObject_car2);

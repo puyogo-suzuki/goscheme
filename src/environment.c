@@ -43,7 +43,7 @@ environment_clone(environment_t * out, environment_t * inenv) {
 }
 
 error_t
-addfunc(environment_t * out, char * name, size_t name_length, error_t(*func)(struct machine *, struct environment *, schemeObject_t *, schemeObject_t **)) {
+addfunc(environment_t * out, char * name, size_t name_length, schemeFunction_t * func) {
 	string_t str;
 	string_new_deep(&str, name, name_length);
 	schemeObject_t * obj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
@@ -120,14 +120,14 @@ error_t
 environment_setq2(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
 	schemeObject_t * valres = NULL;
 	string_t s;
-	CHKERROR(machine_eval(self, env, val, &valres)) // valres.rc++;
+	CHKERROR(machine_evalforce(self, env, val, &valres)) // valres.rc++;
 	string_copy(&s, name);
 	CHKERROR(environment_register(env, s, valres))
 	return ERR_SUCCESS;
 }
 
 error_t
-environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
+environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
@@ -149,13 +149,14 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 	CHKERROR(gc_deref_schemeObject(cadr))
 	CHKERROR(gc_deref_schemeObject(cdr))
 	CHKERROR(gc_deref_schemeObject(val))
-	* out = car;
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = car;
 	return ERR_SUCCESS;
 }
 
 
 error_t
-environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
+environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * cadrres = NULL;
 	error_t ret = ERR_SUCCESS;
@@ -174,7 +175,7 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 	}
 	CHKERROR(schemeObject_cdr(val, &cdr))
 	CHKERROR(schemeObject_car(cdr, &cadr))
-	CHKERROR(machine_eval(self, env, cadr, &cadrres)) // cadrres.rc++;
+	CHKERROR(machine_evalforce(self, env, cadr, &cadrres)) // cadrres.rc++;
 	hashItem_t * hi;
 	environment_t * current = env;
 	while(current != NULL) {
@@ -196,6 +197,7 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 	CHKERROR(gc_deref_schemeObject(cadr))
 	CHKERROR(gc_deref_schemeObject(cdr))
 	CHKERROR(gc_deref_schemeObject(val))
-	* out = car;
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = car;
 	return ret;
 }
