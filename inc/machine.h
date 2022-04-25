@@ -8,11 +8,6 @@ typedef struct machine {
 error_t
 machine_new(machine_t * out);
 
-error_t
-machine_begin(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);
-
-error_t
-machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);
-
-error_t
-machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(machine_begin);
+DECL_SCHEMEFUNC(machine_eval);
+DECL_SCHEMEFUNC(machine_lambda);

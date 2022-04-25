@@ -13,6 +13,8 @@ struct machine;
 // current machine, current environment, input arguments, output.
 typedef error_t schemeFunction_t(struct machine *, struct environment * env, struct schemeObject *, struct schemeObject **);
 
+#define DECL_SCHEMEFUNC(name) error_t name(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out)
+
 typedef enum schemeObject_kind {
 	SCHEME_OBJECT_SYMBOL,
 	SCHEME_OBJECT_STRING,
@@ -70,14 +72,15 @@ bool
 schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
 
 error_t schemeObject_cons(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(schemeObject_cons);
 error_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
-error_t schemeObject_car2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(schemeObject_car2);
 error_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
-error_t schemeObject_cdr2(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(schemeObject_cdr2);
 
 error_t
 schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper);
 
-error_t schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(schemeObject_quote);
 
 error_t schemeObject_toString(string_t * out, schemeObject_t * inobj);

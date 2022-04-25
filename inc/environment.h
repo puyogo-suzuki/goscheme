@@ -28,7 +28,5 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val);
 
 error_t
 environment_setq2(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val);
-error_t
-environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);
-error_t
-environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out);
+DECL_SCHEMEFUNC(environment_setq);
+DECL_SCHEMEFUNC(environment_set_destructive);
