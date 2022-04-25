@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -Werror -Wno-parentheses
+CFLAGS=-g -Wall -Werror -Wno-parentheses -Wno-unused-variable
 INC=./inc
 SRCS=$(wildcard src/*.c)
 SRCS2=$(addprefix src/,$(SRCS))
