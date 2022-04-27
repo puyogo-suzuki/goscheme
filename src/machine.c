@@ -178,9 +178,7 @@ machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, eval
 	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if(outobj == NULL) return ERR_OUT_OF_MEMORY;
 	CHKERROR(gc_ref(&(env->gcInfo)))
-	CHKERROR(gc_ref(&(val->gcInfo)))
 	CHKERROR(schemeObject_new_procedure(outobj, env, val))
-	CHKERROR(gc_deref_schemeObject(val))
 	CHKERROR(gc_ref(&(outobj->gcInfo)))
 	out->kind = EVALUATIONRESULT_EVALUATED;
 	out->value.evaluatedValue = outobj;

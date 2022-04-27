@@ -66,6 +66,7 @@ gc_deref_environment(struct environment * self) {
         current->gcInfo--;
         if(current->gcInfo > 0) break;
         current = current->parent;
+        CHKERROR(environment_free(me))
         free(me);
     }
     error_OOMRecoverByFreeing = perror_OOMRecoverByFreeing;

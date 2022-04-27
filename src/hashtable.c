@@ -8,6 +8,13 @@ hashtable_new(hashtable_t * out) {
 	return ERR_SUCCESS;
 }
 
+void
+hashtable_free(hashtable_t * self) {
+	for (int i = 0; i < HASHTABLE_SIZE; ++i) {
+		linkedList_free(self->table[i]);
+	}
+}
+
 error_t
 hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(void *))) {
 	return linkedList_add(&(out->table[hasher(value) % HASHTABLE_SIZE]), value, valueSize);
@@ -32,3 +39,4 @@ hashtable_foreach(hashtable_t * self, error_t (action)(void *)) {
 		CHKERROR(linkedList_foreach(self->table[i], action))
 	return ERR_SUCCESS;
 }
+

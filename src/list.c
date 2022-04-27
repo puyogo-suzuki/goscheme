@@ -55,6 +55,7 @@ linkedList_add(linkedList_t ** out, void * value, size_t size) {
 
 void
 linkedList_free(linkedList_t * out) {
+	if (out == LINKEDLIST_TERMINATOR) return;
 	linkedList_t * ne = out->next;
 	while (ne != LINKEDLIST_TERMINATOR) {
 		free(out);

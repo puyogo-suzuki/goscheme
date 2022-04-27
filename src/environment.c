@@ -102,6 +102,21 @@ environment_new_global(environment_t * out)
 	return ERR_SUCCESS;
 }
 
+error_t
+free_act(hashItem_t * tbl) {
+	string_free(&(tbl->name));
+	CHKERROR(gc_deref_schemeObject(tbl->value))
+	return ERR_SUCCESS;
+}
+
+error_t
+environment_free(environment_t * self)
+{
+	CHKERROR(hashtable_foreach(&(self->env), free_act))
+	hashtable_free(&(self->env));
+	return ERR_SUCCESS;
+}
+
 bool
 comp(hashItem_t * hi, string_t * str) {
 	return string_equals(&(hi->name), str);

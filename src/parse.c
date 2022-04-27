@@ -11,11 +11,11 @@ typedef struct parseEnv {
 } parseEnv_t;
 
 error_t
-env_append(parseEnv_t * pe, schemeObject_t * so) {
+env_append(parseEnv_t * pe, schemeObject_t * so, bool isRefIncrement) {
 	schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (cell == NULL) return ERR_OUT_OF_MEMORY;
 	CHKERROR(schemeObject_new_cons2(cell, so))
-	if(so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
+	if(isRefIncrement && so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
 	*pe->tailnext = cell;
 	CHKERROR(gc_ref(&cell->gcInfo))
 	pe->tailnext = &(cell->value.consValue.next);
@@ -46,7 +46,7 @@ if (!linkedList_pop2(&envStack, NULL, parseEnv_t)) {\
 }\
 if (envStack == NULL) goto L_END;\
 current = linkedList_get2(envStack, parseEnv_t);\
-PARSE_CHKERROR(env_append(current, so)) \
+PARSE_CHKERROR(env_append(current, so, false)) \
 }
 
 error_t
@@ -71,7 +71,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 				string_t st;
 				PARSE_CHKERROR(string_new_deep2(&st, "quote"))
 				PARSE_CHKERROR(schemeObject_new_symbol(so, st))
-				PARSE_CHKERROR(env_append(current, so))
+				PARSE_CHKERROR(env_append(current, so, true))
 			}
 		} else {
 			if(current == NULL) // mono symbol.
@@ -81,7 +81,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 				while(current->quote) PARSE_POP // when '( ...
 			} else if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL;
 			else {
-				PARSE_CHKERROR(env_append(current, so))
+				PARSE_CHKERROR(env_append(current, so, true))
 				while(current->quote)PARSE_POP // when 'some
 			}
 		}

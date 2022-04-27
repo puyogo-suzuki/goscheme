@@ -18,6 +18,9 @@ error_t
 environment_new_global(environment_t * out);
 
 error_t
+environment_free(environment_t * self);
+
+error_t
 environment_clone(environment_t * out, environment_t * inenv);
 
 bool

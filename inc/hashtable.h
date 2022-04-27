@@ -10,6 +10,9 @@ typedef struct hashtable {
 error_t
 hashtable_new(hashtable_t * out);
 
+void
+hashtable_free(hashtable_t * self);
+
 error_t
 hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(void *)));
 
