@@ -6,6 +6,7 @@
  - GNU make
  - Compiler : APPLE Clang or Clang or GCC or Visual C++ 2019
 
+Below microcomputers could run.
  - ESP32(not included in this repository)
 
 ## How to build and execute
