@@ -44,6 +44,6 @@ void string_default(string_t * s);
 void string_free(string_t * s);
 
 gserror_t stringBuilder_new(stringBuilder_t * outsb);
-gserror_t stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length);
-gserror_t stringBuilder_toString(string_t * outstr, stringBuilder_t * insb);
+gserror_t stringBuilder_append(stringBuilder_t * outsb, const char * str, size_t length);
+gserror_t stringBuilder_toString(string_t * outstr, const stringBuilder_t * insb);
 void stringBuilder_free(stringBuilder_t * sb);

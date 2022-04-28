@@ -150,7 +150,7 @@ stringBuilder_new(stringBuilder_t * outsb) {
 }
 
 gserror_t
-stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length) {
+stringBuilder_append(stringBuilder_t * outsb, const char * str, size_t length) {
     if(length + outsb->length + 1 > outsb->bufferSize) {
         size_t increaseSize = 0;
         if(outsb->bufferSize < STRINGBUILDER_INCREASE_SIZE)
@@ -172,7 +172,7 @@ stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length) {
 }
 
 gserror_t
-stringBuilder_toString(string_t * outstr, stringBuilder_t * insb) {
+stringBuilder_toString(string_t * outstr, const stringBuilder_t * insb) {
     return string_new_deep(outstr, insb->buffer, insb->length);
 }
 

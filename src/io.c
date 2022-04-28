@@ -1,5 +1,16 @@
 ﻿#include "io.h"
+#if _ESP
+#include "esp_cpp_ffi.h"
+void
+string_write(FILE * f, string_t * str) {
+	serialOut2(str->buffer, string_getLength(str));
+}
 
+void
+string_writeLine(FILE * f, string_t * str) {
+	serialOut3(str->buffer, string_getLength(str));
+}
+#else
 void
 string_write(FILE * f, string_t * str) {
 	char cur;
@@ -16,3 +27,4 @@ string_writeLine(FILE * f, string_t * str) {
 #endif
 	putc('\n', f);
 }
+#endif

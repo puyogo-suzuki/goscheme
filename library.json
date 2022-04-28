@@ -4,7 +4,7 @@
 "build" : {
     "includeDir" : "inc",
     "srcDir" : "src",
-    "flags" : ["-D ESP"],
+    "flags" : ["-D _ESP"],
     "srcFilter" : ["+<*>", "-<main.c>"]
 },
 "frameworks": "*",
