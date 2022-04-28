@@ -42,36 +42,36 @@ a
  - [x] quote
  - [x] lambda
  - [x] set!
- - [] let
- - [] let*
- - [] letrec
+ - [ ] let
+ - [ ] let*
+ - [ ] letrec
  - [x] if
- - [] cond
+ - [ ] cond
  - [x] begin
- - [] do
+ - [ ] do
  - [x] number?
- - [] pair?
- - [] list?
+ - [ ] pair?
+ - [ ] list?
  - [x] symbol?
  - [x] car
  - [x] cdr
  - [x] cons
- - [] length
- - [] memq
- - [] last
- - [] append
- - [] set-car!
- - [] set-cdr!
+ - [ ] length
+ - [ ] memq
+ - [ ] last
+ - [ ] append
+ - [ ] set-car!
+ - [ ] set-cdr!
  - [x] string?
- - [] string-append
- - [] symbol->string
- - [] string->symbol
- - [] string->number
- - [] number->string
+ - [ ] string-append
+ - [ ] symbol->string
+ - [ ] string->symbol
+ - [ ] string->number
+ - [ ] number->string
  - [x] procedure?(手抜き実装でScheme非互換)
- - [] eq?
- - [] neq?
- - [] equal?
- - [] and
- - [] or
+ - [ ] eq?
+ - [ ] neq?
+ - [ ] equal?
+ - [ ] and
+ - [ ] or
  
