@@ -123,6 +123,8 @@ c1up
  - [ ] eq?
  - [ ] neq?
  - [ ] equal?
+ - [x] boolean?
+ - [ ] not
  - [ ] and
  - [ ] or
  
