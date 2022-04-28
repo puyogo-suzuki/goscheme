@@ -232,6 +232,7 @@ L_NOT_COMING_NUMBER:
 })
 
 PRED_FUNC(builtin_numberp, "number?", arg0->kind == SCHEME_OBJECT_NUMBER)
+PRED_FUNC(builtin_stringp, "boolean?", arg0 == &predefined_t || arg0 == &predefined_f)
 PRED_FUNC(builtin_stringp, "string?", arg0->kind == SCHEME_OBJECT_STRING)
 PRED_FUNC(builtin_nullp, "null?", arg0 == SCHEME_OBJECT_NILL)
 PRED_FUNC(builtin_symbolp, "symbol?", arg0->kind == SCHEME_OBJECT_SYMBOL)
