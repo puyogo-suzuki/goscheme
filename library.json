@@ -1,0 +1,12 @@
+{
+"name" : "Goscheme", 
+"version" : "1.0.0",
+"build" : {
+    "includeDir" : "inc",
+    "srcDir" : "src",
+    "flags" : ["-D ESP"],
+    "srcFilter" : ["+<*>", "-<main.c>"]
+},
+"frameworks": "*",
+"platforms": "*"
+}
