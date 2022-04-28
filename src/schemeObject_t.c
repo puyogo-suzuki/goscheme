@@ -4,7 +4,7 @@
 #include "machine.h"
 #include <stdio.h>
 
-error_t
+gserror_t
 schemeObject_new_string(schemeObject_t * out, string_t str) {
 	out->kind = SCHEME_OBJECT_STRING;
 	out->value.strValue = str;
@@ -12,7 +12,7 @@ schemeObject_new_string(schemeObject_t * out, string_t str) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_new_number(schemeObject_t * out, int32_t num) {
 	out->kind = SCHEME_OBJECT_NUMBER;
 	out->value.numValue = num;
@@ -20,7 +20,7 @@ schemeObject_new_number(schemeObject_t * out, int32_t num) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_new_symbol(schemeObject_t * out, string_t sym) {
 	out->kind = SCHEME_OBJECT_SYMBOL;
 	out->value.symValue = sym;
@@ -28,7 +28,7 @@ schemeObject_new_symbol(schemeObject_t * out, string_t sym) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject_t * next) {
 	out->kind = SCHEME_OBJECT_CONS;
 	out->value.consValue.value = value;
@@ -37,7 +37,7 @@ schemeObject_new_cons(schemeObject_t * out, schemeObject_t * value, schemeObject
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, schemeFunction_t * func) {
 	out->kind = SCHEME_OBJECT_EXTERN_FUNCTION;
 	out->value.extFuncValue.environment = environment;
@@ -46,7 +46,7 @@ schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment,
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_new_procedure(schemeObject_t * out, struct environment * environment, schemeObject_t * body) {
 	out->kind = SCHEME_OBJECT_PROCEDURE;
 	out->value.procedureValue.environment = environment;
@@ -55,7 +55,7 @@ schemeObject_new_procedure(schemeObject_t * out, struct environment * environmen
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj) {
 	if(inobj == SCHEME_OBJECT_NILL) {
 		*out = SCHEME_OBJECT_NILL;
@@ -95,7 +95,7 @@ typedef struct clone_env {
 	schemeObject_t * readFrom;
 } clone_env_t;
 
-error_t
+gserror_t
 schemeObject_copy(schemeObject_t ** out, schemeObject_t * inobj) { // *out's reference count is 1.
 	if(inobj == SCHEME_OBJECT_NILL) {
 		*out = SCHEME_OBJECT_NILL;
@@ -144,7 +144,7 @@ schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
 	return listLength == i;
 }
 
-error_t
+gserror_t
 schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
 	if(self == SCHEME_OBJECT_NILL || self->kind != SCHEME_OBJECT_CONS) {
 		errorOut("ERROR", "car", "car requires CONS cell.");
@@ -155,7 +155,7 @@ schemeObject_car(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
 	if (self == SCHEME_OBJECT_NILL || self->kind != SCHEME_OBJECT_CONS) {
 		errorOut("ERROR", "cdr", "cdr requires CONS cell.");
@@ -166,7 +166,7 @@ schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cadr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cdr;
 	CHKERROR(schemeObject_cdr(self, &cdr))
@@ -175,7 +175,7 @@ schemeObject_cadr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cddr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cdr;
 	CHKERROR(schemeObject_cdr(self, &cdr))
@@ -184,7 +184,7 @@ schemeObject_cddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_caddr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cddr;
 	CHKERROR(schemeObject_cddr(self, &cddr))
@@ -193,7 +193,7 @@ schemeObject_caddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cdddr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cddr;
 	CHKERROR(schemeObject_cddr(self, &cddr))
@@ -202,7 +202,7 @@ schemeObject_cdddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cadddr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cdddr;
 	CHKERROR(schemeObject_cdddr(self, &cdddr))
@@ -211,7 +211,7 @@ schemeObject_cadddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out) {
 	schemeObject_t * cdddr;
 	CHKERROR(schemeObject_cdddr(self, &cdddr))
@@ -220,7 +220,7 @@ schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper) {
 	schemeObject_t ** writeTo = out;
 	schemeObject_t * readFrom = inobj;
@@ -244,7 +244,7 @@ schemeObject_map(struct machine * self, struct environment * env, schemeObject_t
 }
 
 
-error_t
+gserror_t
 schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (!schemeObject_isListLimited(val, 1)) {
 		errorOut("ERROR", "quote", "quote requires 1 argument.");
@@ -258,7 +258,7 @@ schemeObject_quote(struct machine * self, struct environment * env, schemeObject
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 	stringBuilder_t sb;
 	linkedList_t * stack = NULL;

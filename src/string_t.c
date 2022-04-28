@@ -1,7 +1,7 @@
 #include "string_t.h"
 #include "winbsdfunc.h"
 
-error_t
+gserror_t
 string_new(string_t * outstring, size_t length) {
     char * buf = (char *)reallocarray(NULL, length + 1, sizeof(char));
     if (buf == NULL) return ERR_OUT_OF_MEMORY;
@@ -11,7 +11,7 @@ string_new(string_t * outstring, size_t length) {
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 string_new_shallow(string_t * outstring, char * buf, size_t length) {
 #if _DEBUG
     *outstring = (string_t){ buf, length, true };
@@ -21,12 +21,12 @@ string_new_shallow(string_t * outstring, char * buf, size_t length) {
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 string_new_shallow2(string_t * outstring, char * buf) {
     return string_new_shallow(outstring, buf, strlen(buf));
 }
 
-error_t
+gserror_t
 string_new_deep(string_t * outstring, char * buf, size_t length) {
     *outstring = (string_t){(char *)reallocarray(NULL, length + 1, sizeof(char)), length};
     if (outstring->buffer == NULL) {
@@ -38,29 +38,29 @@ string_new_deep(string_t * outstring, char * buf, size_t length) {
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 string_new_deep2(string_t * outstring, char * buf) {
     return string_new_deep(outstring, buf, strlen(buf));
 }
 
-error_t
+gserror_t
 string_copy(string_t * dst, string_t * src){
     return string_new_deep(dst, src->buffer, src->length);
 }
 
-error_t
+gserror_t
 string_substring_shallow(string_t * outstring, string_t * src, size_t start, size_t length) {
     if(src->length < start + length) return ERR_OUT_OF_INDEX;
     return string_new_shallow(outstring, &(src->buffer[start]), length);
 }
 
-error_t
+gserror_t
 string_substring_deep(string_t * outstring, const string_t * src, size_t start, size_t length) {
     if(src->length < start + length) return ERR_OUT_OF_INDEX;
     return string_new_deep(outstring, &(src->buffer[start]), length);
 }
 
-error_t
+gserror_t
 string_getAt(string_t * s, size_t index, char * outch) {
     if(s->length <= index) return ERR_OUT_OF_INDEX;
     *outch = s->buffer[index];
@@ -76,7 +76,7 @@ int32_t string_hash(string_t * self)
     return result;
 }
 
-error_t
+gserror_t
 string_overWrite(string_t * dst, const string_t * src, size_t start) {
     if (start + src->length > dst->length) {
         char * buf = (char *)reallocarray(dst->buffer, start + src->length, sizeof(char));
@@ -105,7 +105,7 @@ string_getLength(string_t * s) {
     return s->length;
 }
 
-error_t
+gserror_t
 string_parseInt(string_t * s, int32_t * outi) {
     char ch = '\0';
     int ret = 0;
@@ -139,7 +139,7 @@ string_free(string_t * s) {
     string_default(s);
 }
 
-error_t
+gserror_t
 stringBuilder_new(stringBuilder_t * outsb) {
     outsb->buffer = (char *)reallocarray(NULL, sizeof(char), STRINGBUILDER_INITIAL_SIZE);
     if(outsb->buffer == NULL) return ERR_OUT_OF_MEMORY;
@@ -149,7 +149,7 @@ stringBuilder_new(stringBuilder_t * outsb) {
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length) {
     if(length + outsb->length + 1 > outsb->bufferSize) {
         size_t increaseSize = 0;
@@ -171,7 +171,7 @@ stringBuilder_append(stringBuilder_t * outsb, char * str, size_t length) {
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 stringBuilder_toString(string_t * outstr, stringBuilder_t * insb) {
     return string_new_deep(outstr, insb->buffer, insb->length);
 }

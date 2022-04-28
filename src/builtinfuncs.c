@@ -5,7 +5,7 @@
 #include "common.h"
 #include "schemeObject_predefined_object.h"
 
-#define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  error_t \
+#define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  gserror_t \
 funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
 	schemeObject_t * outobj;  \
 	if (!schemeObject_isListLimited(val, 1)) { \
@@ -25,7 +25,7 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 	return ERR_SUCCESS; \
 } \
 
-error_t
+gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (!schemeObject_isListLimited(val, 3)) {
 		errorOut("ERROR", "if", "if requires 3 argument.");
@@ -54,7 +54,7 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 builtin_cons(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	schemeObject_t * outobj;
 	if (!schemeObject_isListLimited(val, 2)) {
@@ -101,7 +101,7 @@ ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &
     CHKERROR(gc_deref_schemeObject(prev_cdr)) \
 }
 
-error_t
+gserror_t
 builtin_additive(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	int32_t retval = 0;
     if(!schemeObject_isList(val)) {
@@ -130,7 +130,7 @@ builtin_additive(machine_t * self, environment_t * env, schemeObject_t * val, ev
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 builtin_subtract(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	int32_t retval = 0;
     if(!schemeObject_isList(val)) {
@@ -163,7 +163,7 @@ L_NOT_COMING_NUMBER:
     return ERR_EVAL_INVALID_OBJECT_TYPE;
 }
 
-error_t
+gserror_t
 builtin_multiplication(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	int32_t retval = 1;
     if(!schemeObject_isList(val)) {
@@ -192,7 +192,7 @@ builtin_multiplication(machine_t * self, environment_t * env, schemeObject_t * v
     return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 builtin_division(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	int32_t retval = 0;
     if(!schemeObject_isList(val)) {

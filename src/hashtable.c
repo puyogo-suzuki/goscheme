@@ -1,6 +1,6 @@
 #include <hashtable.h>
 
-error_t
+gserror_t
 hashtable_new(hashtable_t * out) {
 	for (int i = 0; i < HASHTABLE_SIZE; ++i) {
 		out->table[i] = NULL;
@@ -15,7 +15,7 @@ hashtable_free(hashtable_t * self) {
 	}
 }
 
-error_t
+gserror_t
 hashtable_add(hashtable_t * out, void * value, size_t valueSize, int32_t(hasher(void *))) {
 	return linkedList_add(&(out->table[hasher(value) % HASHTABLE_SIZE]), value, valueSize);
 }
@@ -26,15 +26,15 @@ hashtable_get(hashtable_t * self, void ** outValue, void * value, int32_t(hasher
 }
 
 
-error_t
+gserror_t
 hashtable_copy(hashtable_t * dst, hashtable_t * src, size_t size) {
 	for(int i = 0; i < HASHTABLE_SIZE; ++i)
 		CHKERROR(linkedList_copy(&(dst->table[i]), src->table[i], size))
 	return ERR_SUCCESS;
 }
 
-error_t
-hashtable_foreach(hashtable_t * self, error_t (action)(void *)) {
+gserror_t
+hashtable_foreach(hashtable_t * self, gserror_t (action)(void *)) {
 	for(int i = 0; i < HASHTABLE_SIZE; ++i)
 		CHKERROR(linkedList_foreach(self->table[i], action))
 	return ERR_SUCCESS;

@@ -16,10 +16,10 @@ typedef struct evaluationResult{
 	} value;
 } evaluationResult_t;
 
-error_t
+gserror_t
 machine_new(machine_t * out);
 
-error_t
+gserror_t
 machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t ** out);
 
 DECL_SCHEMEFUNC(machine_begin);

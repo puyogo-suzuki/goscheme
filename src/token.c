@@ -82,7 +82,7 @@ L_FAIL:
     return false;
 }
 
-error_t
+gserror_t
 token_toString(token_t * self, string_t * out) {
     char str_str[] = "TOKEN_STRING(";
     char str_sym[] = "TOKEN_SYMBOL(";

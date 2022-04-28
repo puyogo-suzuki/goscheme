@@ -9,7 +9,7 @@ gcInfo_new(gcInfo_t * out) {
 }
 
 // derefって逆参照じゃーんって思ってるけどもう書いてしまってるからSHOGANAI
-error_t
+gserror_t
 gc_deref_schemeObject(struct schemeObject * self) {
     linkedList_t * ll = NULL;
     schemeObject_t * current = NULL;
@@ -56,7 +56,7 @@ gc_deref_schemeObject(struct schemeObject * self) {
     error_OOMRecoverByFreeing = perror_OOMRecoverByFreeing;
     return ERR_SUCCESS;
 }
-error_t
+gserror_t
 gc_deref_environment(struct environment * self) {
     environment_t * current = self;
     bool perror_OOMRecoverByFreeing = error_OOMRecoverByFreeing;
@@ -72,7 +72,7 @@ gc_deref_environment(struct environment * self) {
     error_OOMRecoverByFreeing = perror_OOMRecoverByFreeing;
     return ERR_SUCCESS;
 }
-error_t
+gserror_t
 gc_ref(gcInfo_t * self) {
     *self = *self + 1;
     return ERR_SUCCESS;

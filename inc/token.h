@@ -33,5 +33,5 @@ tokenizer_new(string_t str);
 bool
 tokenizer_next(tokenizer_t * self, token_t * out_token);
 
-error_t
+gserror_t
 token_toString(token_t * self, string_t * out);

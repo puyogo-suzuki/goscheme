@@ -16,11 +16,11 @@ typedef enum {
 	ERR_EVAL_NOT_FOUND_SYMBOL,
 	ERR_EVAL_INVALID_OBJECT_TYPE,
 	ERR_EVAL_ARGUMENT_MISMATCH
-} error_t;
+} gserror_t;
 
-#define CHKERROR(act) { error_t result_error = (act); if(result_error != ERR_SUCCESS) return result_error; }
+#define CHKERROR(act) { gserror_t result_error = (act); if(result_error != ERR_SUCCESS) return result_error; }
 
 inline void
-errorOut(char * errorLevel, char * moduleName, char * message) {
+errorOut(const char * errorLevel, const char * moduleName, const char * message) {
 	fprintf(stderr, "[%s] %s: %s\n", errorLevel, moduleName, message);
 }

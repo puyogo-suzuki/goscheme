@@ -10,7 +10,7 @@ typedef struct parseEnv {
 	bool quote;
 } parseEnv_t;
 
-error_t
+gserror_t
 env_append(parseEnv_t * pe, schemeObject_t * so, bool isRefIncrement) {
 	schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
 	if (cell == NULL) return ERR_OUT_OF_MEMORY;
@@ -22,7 +22,7 @@ env_append(parseEnv_t * pe, schemeObject_t * so, bool isRefIncrement) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 parse_symbol(schemeObject_t ** so, token_t * ot) {
 	if (ot->tokenKind == TOKEN_SYMBOL && (string_equals2(&(ot->value.strValue), "nil", 3) || string_equals2(&(ot->value.strValue), "NIL", 3))) {
 		*so = SCHEME_OBJECT_NILL;
@@ -49,13 +49,13 @@ current = linkedList_get2(envStack, parseEnv_t);\
 PARSE_CHKERROR(env_append(current, so, false)) \
 }
 
-error_t
+gserror_t
 parse(schemeObject_t ** out, tokenizer_t * input) {
 	token_t ot;
 	linkedList_t * envStack = NULL;
 	parseEnv_t * current = NULL;
 	schemeObject_t * so = NULL;
-	error_t errorReason = ERR_SUCCESS;
+	gserror_t errorReason = ERR_SUCCESS;
 	while (tokenizer_next(input, &ot)) {
 		if (ot.tokenKind == TOKEN_PAREN_OPEN || ot.tokenKind == TOKEN_QUOTE) {
 			parseEnv_t newEnv = { NULL, NULL, false };

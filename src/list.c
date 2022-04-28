@@ -1,6 +1,6 @@
 #include "list.h"
 
-error_t
+gserror_t
 linkedList_new(linkedList_t ** out, size_t size) {
 	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
 	if (*out == NULL) return ERR_OUT_OF_MEMORY;
@@ -11,7 +11,7 @@ linkedList_new(linkedList_t ** out, size_t size) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 linkedList_new3(linkedList_t ** out, void * value, size_t size) {
 	*out = (linkedList_t *)reallocarray(NULL, 1, sizeof(linkedList_t *) + size);
 	if (*out == NULL) return ERR_OUT_OF_MEMORY;
@@ -20,7 +20,7 @@ linkedList_new3(linkedList_t ** out, void * value, size_t size) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 linkedList_copy(linkedList_t ** out, linkedList_t * inlist, size_t size) {
 	linkedList_t ** writeTo = out;
 	linkedList_t * readFrom = inlist;
@@ -35,8 +35,8 @@ linkedList_copy(linkedList_t ** out, linkedList_t * inlist, size_t size) {
 	return ERR_SUCCESS;
 }
 
-error_t
-linkedList_foreach(linkedList_t * self, error_t (action)(void *)) {
+gserror_t
+linkedList_foreach(linkedList_t * self, gserror_t (action)(void *)) {
 	linkedList_t * current = self;
 	while(current != LINKEDLIST_TERMINATOR) {
 		CHKERROR(action(&(current->value)))
@@ -45,7 +45,7 @@ linkedList_foreach(linkedList_t * self, error_t (action)(void *)) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 linkedList_add(linkedList_t ** out, void * value, size_t size) {
 	linkedList_t * prev = *out;
 	CHKERROR(linkedList_new3(out, value, size))

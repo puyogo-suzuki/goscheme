@@ -3,5 +3,5 @@
 #include "schemeObject_t.h"
 #include "error.h"
 
-error_t
+gserror_t
 parse(schemeObject_t ** out, tokenizer_t * input);

@@ -4,14 +4,14 @@
 #include "io.h"
 #include "common.h"
 
-error_t
+gserror_t
 machine_new(machine_t * out)
 {
 	environment_new_global(&(out->env));
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 machine_begin(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	schemeObject_t * current = val;
 	schemeObject_t * ret = SCHEME_OBJECT_NILL;
@@ -38,10 +38,10 @@ machine_begin(machine_t * self, environment_t * env, schemeObject_t * val, evalu
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 machine_lambdaexec(machine_t * self, environment_t * env, evaluationResult_t * out, schemeObject_t * body, schemeObject_t * arg) {
 	schemeObject_t * car = NULL, * cdr = NULL;
-	error_t ret = ERR_SUCCESS;
+	gserror_t ret = ERR_SUCCESS;
 	environment_t * the_env;
 	CHKERROR(schemeObject_car(body, &car));
 	CHKERROR(schemeObject_cdr(body, &cdr));
@@ -83,7 +83,7 @@ machine_lambdaexec(machine_t * self, environment_t * env, evaluationResult_t * o
 	return ret;
 }
 
-error_t
+gserror_t
 machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t ** out)
 {
 	evaluationResult_t ret = inresult, ret_prev = inresult;
@@ -97,7 +97,7 @@ machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t 
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 machine_evalforce(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out)
 {
 	evaluationResult_t evalres;
@@ -107,7 +107,7 @@ machine_evalforce(machine_t * self, environment_t * env, schemeObject_t * val, s
 }
 
 
-error_t
+gserror_t
 machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
 	if(val == SCHEME_OBJECT_NILL) {
@@ -133,7 +133,7 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evalua
 		CHKERROR(machine_evalforce(self, env, car, &func))
 		CHKERROR(schemeObject_cdr(val, &cdr))
 		CHKERROR(gc_deref_schemeObject(val))
-		error_t ret = ERR_SUCCESS;
+		gserror_t ret = ERR_SUCCESS;
 		switch(func->kind) {
 			case SCHEME_OBJECT_EXTERN_FUNCTION:
 				ret = func->value.extFuncValue.func(self, env, cdr, out);
@@ -167,7 +167,7 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evalua
 	}
 }
 
-error_t
+gserror_t
 machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	schemeObject_t * outobj = NULL;
 	if(!schemeObject_isList(val)) {

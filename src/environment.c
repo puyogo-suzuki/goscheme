@@ -17,14 +17,14 @@ hashing(hashItem_t * hi) {
 	return string_hash(&(hi->name));
 }
 
-error_t
+gserror_t
 environment_new(environment_t * out, environment_t * parent) {
 	out->parent = parent;
 	gcInfo_new(&out->gcInfo);
 	return hashtable_new(&(out->env));
 }
 
-error_t
+gserror_t
 copyaction(hashItem_t * inplace) {
 	schemeObject_t * sobj = inplace->value;
 	string_t s = inplace->name;
@@ -33,17 +33,17 @@ copyaction(hashItem_t * inplace) {
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 environment_clone(environment_t * out, environment_t * inenv) {
 	environment_new(out, inenv->parent);
 	if(inenv->parent != NULL)
 		CHKERROR(gc_ref(&(inenv->parent->gcInfo)))
 	CHKERROR(hashtable_copy(&(out->env), &(inenv->env), sizeof(schemeObject_t)))
-	CHKERROR(hashtable_foreach(&(out->env), (error_t (*)(void *)) copyaction));
+	CHKERROR(hashtable_foreach(&(out->env), (gserror_t (*)(void *)) copyaction));
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 addfunc(environment_t * out, char * name, size_t name_length, schemeFunction_t * func) {
 	string_t str;
 	string_new_deep(&str, name, name_length);
@@ -55,7 +55,7 @@ addfunc(environment_t * out, char * name, size_t name_length, schemeFunction_t *
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 addsymbol(environment_t * out, char * name, size_t name_length, schemeObject_t * obj) {
 	string_t str;
 	string_new_deep(&str, name, name_length);
@@ -64,7 +64,7 @@ addsymbol(environment_t * out, char * name, size_t name_length, schemeObject_t *
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 environment_new_global(environment_t * out)
 {
 	CHKERROR(environment_new(out, NULL))
@@ -102,14 +102,14 @@ environment_new_global(environment_t * out)
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 free_act(hashItem_t * tbl) {
 	string_free(&(tbl->name));
 	CHKERROR(gc_deref_schemeObject(tbl->value))
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 environment_free(environment_t * self)
 {
 	CHKERROR(hashtable_foreach(&(self->env), free_act))
@@ -137,7 +137,7 @@ L_FOUND:
 	return true;
 }
 
-error_t
+gserror_t
 environment_register(environment_t * self, string_t name, schemeObject_t * val)
 {
 	hashItem_t newhi = {name, val};
@@ -152,7 +152,7 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 	return hashtable_add(&(self->env), &newhi, sizeof(hashItem_t), (int32_t(*)(void *))hashing);
 }
 
-error_t
+gserror_t
 environment_setq3(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
 	string_t s;
 	string_copy(&s, name);
@@ -161,7 +161,7 @@ environment_setq3(struct machine * self, environment_t * env, string_t * name, s
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 environment_setq2(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
 	schemeObject_t * valres = NULL;
 	string_t s;
@@ -171,7 +171,7 @@ environment_setq2(struct machine * self, environment_t * env, string_t * name, s
 	return ERR_SUCCESS;
 }
 
-error_t
+gserror_t
 environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL;
@@ -200,11 +200,11 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 }
 
 
-error_t
+gserror_t
 environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * cadrres = NULL;
-	error_t ret = ERR_SUCCESS;
+	gserror_t ret = ERR_SUCCESS;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	if (!schemeObject_isListLimited(val, 2)) {
 		errorOut("ERROR", "define", "requires 2 - length list.");
