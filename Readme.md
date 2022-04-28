@@ -33,10 +33,52 @@ a
 46
 ```
 
+# Example
+## GC and Tail Call Optimization (may) work.
+```scheme
+> (define a (lambda (v) (b v)))
+a
+> (define b (lambda (v) (a v)))
+b
+> (a 32)
+; ... inifinity loop
+```
+This can be run forever.  
+It will stop if Garbage Collection doesn't works(Out of Memory) or Tail Call Optimization is incomplete(Stack Over Flow).
+
+## Closure (may) work.
+```scheme
+> (define gen-counter (lambda (start) (define v start) (cons (lambda () (set! v (+ v 1))) (lambda () (set! v (- v 1))))))
+gen-counter
+> (define c0 (gen-counter 0))
+c0
+> (define c0up (car c0))
+c0up
+> (c0up)
+1
+> (c0up)
+2
+> (define c1 (gen-counter 0))
+c1
+> (define c1up (car c1))
+c1up
+> (c1up)
+1
+> (c0up)
+3
+```
+
 # Supported Features
  - [x] Garbage Collection(Reference Counting)
  - [x] Tail Call Optimizatioon
- - [] macro?
+ - [ ] macro?
+ - [ ] Rational Number?
+ ---
+ - [x] quote
+ - [ ] negative number
+ - [ ] escape sequence
+ - [ ] dot
+ - [ ] comment
   ---
  - [x] define (partial, doesn't support`(define (a b c) (+ b c))`)
  - [x] quote
@@ -50,6 +92,15 @@ a
  - [x] begin
  - [ ] do
  - [x] number?
+ - [x] +
+ - [x] -
+ - [x] *
+ - [x] /
+ - [ ] =
+ - [ ] <
+ - [ ] <=
+ - [ ] >
+ - [ ] >=
  - [ ] pair?
  - [ ] list?
  - [x] symbol?
