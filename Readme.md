@@ -1,5 +1,5 @@
 # goscheme - Go's Scheme(subset) Implementation 
- *NOT* SCHEME IMPLEMENTATION BY **GOLANG**.
+ **NOT** SCHEME IMPLEMENTATION BY **GOLANG**.
 
 ## requirements
  - OS : macOS, DragonFlyBSD, FreeBSD, Windows 11 (maybe Linux)
