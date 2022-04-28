@@ -12,7 +12,7 @@ string_new(string_t * outstring, size_t length) {
 }
 
 gserror_t
-string_new_shallow(string_t * outstring, char * buf, size_t length) {
+string_new_shallow(string_t * outstring, const char * buf, size_t length) {
 #if _DEBUG
     *outstring = (string_t){ buf, length, true };
 #else
@@ -22,12 +22,12 @@ string_new_shallow(string_t * outstring, char * buf, size_t length) {
 }
 
 gserror_t
-string_new_shallow2(string_t * outstring, char * buf) {
+string_new_shallow2(string_t * outstring, const char * buf) {
     return string_new_shallow(outstring, buf, strlen(buf));
 }
 
 gserror_t
-string_new_deep(string_t * outstring, char * buf, size_t length) {
+string_new_deep(string_t * outstring, const char * buf, size_t length) {
     *outstring = (string_t){(char *)reallocarray(NULL, length + 1, sizeof(char)), length};
     if (outstring->buffer == NULL) {
         free(outstring->buffer);
@@ -39,17 +39,17 @@ string_new_deep(string_t * outstring, char * buf, size_t length) {
 }
 
 gserror_t
-string_new_deep2(string_t * outstring, char * buf) {
+string_new_deep2(string_t * outstring, const char * buf) {
     return string_new_deep(outstring, buf, strlen(buf));
 }
 
 gserror_t
-string_copy(string_t * dst, string_t * src){
+string_copy(string_t * dst, const string_t * src){
     return string_new_deep(dst, src->buffer, src->length);
 }
 
 gserror_t
-string_substring_shallow(string_t * outstring, string_t * src, size_t start, size_t length) {
+string_substring_shallow(string_t * outstring, const string_t * src, size_t start, size_t length) {
     if(src->length < start + length) return ERR_OUT_OF_INDEX;
     return string_new_shallow(outstring, &(src->buffer[start]), length);
 }
@@ -61,13 +61,13 @@ string_substring_deep(string_t * outstring, const string_t * src, size_t start, 
 }
 
 gserror_t
-string_getAt(string_t * s, size_t index, char * outch) {
+string_getAt(const string_t * s, const size_t index, char * outch) {
     if(s->length <= index) return ERR_OUT_OF_INDEX;
     *outch = s->buffer[index];
     return ERR_SUCCESS;
 }
 
-int32_t string_hash(string_t * self)
+int32_t string_hash(const string_t * self)
 {
     char ch;
     int32_t result = 0;

@@ -26,15 +26,15 @@ typedef struct stringBuilder {
 #define stringBuilder_append2(outsb, str) stringBuilder_append(outsb, (str)->buffer, string_getLength(str))
 
 gserror_t string_new(string_t * outstring, size_t length);
-gserror_t string_new_shallow(string_t * outstring, char * buf, size_t length);
-gserror_t string_new_shallow2(string_t * outstring, char * buf);
-gserror_t string_new_deep(string_t * outstring, char * buf, size_t length);
-gserror_t string_new_deep2(string_t * outstring, char * buf);
-gserror_t string_copy(string_t * dst, string_t * src);
-gserror_t string_substring_shallow(string_t * outstring, string_t * src, size_t start, size_t length);
+gserror_t string_new_shallow(string_t * outstring, const char * buf, size_t length);
+gserror_t string_new_shallow2(string_t * outstring, const char * buf);
+gserror_t string_new_deep(string_t * outstring, const char * buf, size_t length);
+gserror_t string_new_deep2(string_t * outstring, const char * buf);
+gserror_t string_copy(string_t * dst, const string_t * src);
+gserror_t string_substring_shallow(string_t * outstring, const string_t * src, size_t start, size_t length);
 gserror_t string_substring_deep(string_t * outstring, const string_t * src, size_t start, size_t length);
-gserror_t string_getAt(string_t * s, size_t index, char * outch);
-int32_t string_hash(string_t * self);
+gserror_t string_getAt(const string_t * s, size_t index, char * outch);
+int32_t string_hash(const string_t * self);
 gserror_t string_overWrite(string_t * dst, const string_t *  src, size_t start);
 bool string_equals(string_t * a, string_t * b);
 bool string_equals2(string_t * a, char * b, int length);
