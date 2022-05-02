@@ -30,8 +30,15 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
             case '\'':
                 out_token->tokenKind = TOKEN_QUOTE;
                 goto L_PAREN;
+            case ';':
+                while(true) {
+                    if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
+                        return false;
+                    if(cur == '\n') goto L_OUTER_WHILE_CONTINUE;
+                }
             default: goto L_BREAK_WHILE;
         }
+        L_OUTER_WHILE_CONTINUE:
         self->position++;
     } L_BREAK_WHILE:
 
