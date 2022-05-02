@@ -113,7 +113,7 @@ free_act(hashItem_t * tbl) {
 gserror_t
 environment_free(environment_t * self)
 {
-	CHKERROR(hashtable_foreach(&(self->env), free_act))
+	CHKERROR(hashtable_foreach(&(self->env), (gserror_t (*)(void*))free_act))
 	hashtable_free(&(self->env));
 	return ERR_SUCCESS;
 }

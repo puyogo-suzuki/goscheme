@@ -16,7 +16,7 @@ string_new_shallow(string_t * outstring, const char * buf, size_t length) {
 #if _DEBUG
     *outstring = (string_t){ buf, length, true };
 #else
-    *outstring = (string_t){ buf, length };
+    *outstring = (string_t){ (char *)buf, length };
 #endif
     return ERR_SUCCESS;
 }

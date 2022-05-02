@@ -38,15 +38,23 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
 
     startPos = self->position;
     bool isString = cur == '"';
-    bool isNum = isNumChar(cur);
+    bool firstNegate = cur == '-';
+    bool isNum = firstNegate|| isNumChar(cur);
     self->position++;
 
     while(string_getAt(&self->str, self->position, &cur) == ERR_SUCCESS) {
+        L_RETRY:
         switch(cur) {
             case '\n': goto L_OTHER;
             case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
             case '"': if (isString) goto L_STRING; else goto L_FAIL;
-            default: if(isNum && !isNumChar(cur)) goto L_FAIL; else break;
+            default:
+                if(isNum && !isNumChar(cur)) {
+                    if(firstNegate) {
+                        isNum = false;
+                        goto L_RETRY;
+                    } else goto L_FAIL;
+                } else break;
         }
         self->position++;
     }
