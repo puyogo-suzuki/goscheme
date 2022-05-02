@@ -38,6 +38,7 @@
         "string_view": "c",
         "unordered_map": "c",
         "common.h": "c",
-        "machine.h": "c"
+        "machine.h": "c",
+        "ios": "c"
     }
 }

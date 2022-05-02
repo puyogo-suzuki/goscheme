@@ -258,53 +258,60 @@ schemeObject_quote(struct machine * self, struct environment * env, schemeObject
 	return ERR_SUCCESS;
 }
 
+typedef struct toStringEnv {
+	schemeObject_t * cur;
+	bool dot;
+} toStringEnv_t;
+
 gserror_t
 schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 	stringBuilder_t sb;
 	linkedList_t * stack = NULL;
-	linkedList_add2(&stack, &inobj, schemeObject_t *);
+	toStringEnv_t env = {inobj, false};
+	linkedList_add2(&stack, &env, toStringEnv_t);
 	CHKERROR(stringBuilder_new(&sb))
-	schemeObject_t * cur = inobj;
-	if(cur == SCHEME_OBJECT_NILL) {
+	if(env.cur == SCHEME_OBJECT_NILL) {
 		CHKERROR(stringBuilder_append(&sb, "'()", 3))
 		goto L_END;
 	}
-	if(cur->kind == SCHEME_OBJECT_CONS) {
+	if(env.cur->kind == SCHEME_OBJECT_CONS) {
 		CHKERROR(stringBuilder_append(&sb, "(", 1))
-		cur = cur->value.consValue.value;
-		if(cur->kind == SCHEME_OBJECT_CONS)
+		env.cur = env.cur->value.consValue.value;
+		if(env.cur->kind == SCHEME_OBJECT_CONS)
 			CHKERROR(stringBuilder_append(&sb, "(", 1))
 	}
-	linkedList_pop2(&stack, &cur, schemeObject_t *);
+	linkedList_pop2(&stack, &env, toStringEnv_t);
 	{ // do-whileにしたかったけど、ダメでした（非効率なコード書けば変形できる）
 		L_START:
-		if(cur == SCHEME_OBJECT_NILL)
+		if(env.cur == SCHEME_OBJECT_NILL)
 			CHKERROR(stringBuilder_append(&sb, ")", 1))
-		while(cur != SCHEME_OBJECT_NILL) {
-			switch(cur->kind) {
+		if(env.dot)
+			CHKERROR(stringBuilder_append(&sb, ". ", 2))
+		while(env.cur != SCHEME_OBJECT_NILL) {
+			switch(env.cur->kind) {
 				case SCHEME_OBJECT_SYMBOL:
-					CHKERROR(stringBuilder_append2(&sb, &(cur->value.strValue)))
+					CHKERROR(stringBuilder_append2(&sb, &(env.cur->value.strValue)))
 					goto CONTINUE_OUTER_WHILE;
 				case SCHEME_OBJECT_STRING:
 					CHKERROR(stringBuilder_append(&sb, "\"", 1))
-					CHKERROR(stringBuilder_append2(&sb, &(cur->value.strValue)))
+					CHKERROR(stringBuilder_append2(&sb, &(env.cur->value.strValue)))
 					CHKERROR(stringBuilder_append(&sb, "\"", 1))
 					goto CONTINUE_OUTER_WHILE;
 				case SCHEME_OBJECT_NUMBER: {
 					char buf[32];
-					sprintf(buf, "%d", cur->value.numValue);
+					sprintf(buf, "%d", env.cur->value.numValue);
 					CHKERROR(stringBuilder_append(&sb, buf, strlen(buf)));
 					goto CONTINUE_OUTER_WHILE;
 				}
 				case SCHEME_OBJECT_CONS: {
-					schemeObject_t * ne = cur->value.consValue.next;
-					if(ne != SCHEME_OBJECT_NILL && ne->kind != SCHEME_OBJECT_CONS)
-						CHKERROR(stringBuilder_append(&sb, ".", 1))
-					linkedList_add2(&stack, &ne, schemeObject_t *);
-					cur = cur->value.consValue.value;
-					if(cur == SCHEME_OBJECT_NILL) {
+					toStringEnv_t ne = {env.cur->value.consValue.next, false};
+					if(ne.cur != SCHEME_OBJECT_NILL && ne.cur->kind != SCHEME_OBJECT_CONS)
+						ne.dot = true;
+					linkedList_add2(&stack, &ne, toStringEnv_t);
+					env.cur = env.cur->value.consValue.value;
+					if(env.cur == SCHEME_OBJECT_NILL) {
 						CHKERROR(stringBuilder_append(&sb, "NIL", 3))
-					}else if (cur->kind == SCHEME_OBJECT_CONS) CHKERROR(stringBuilder_append(&sb, "(", 1))
+					}else if (env.cur->kind == SCHEME_OBJECT_CONS) CHKERROR(stringBuilder_append(&sb, "(", 1))
 					/*else if (cur->kind == SCHEME_OBJECT_CONS) {
 						if (cur->value.consValue.value->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&cur->value.consValue.value->value.symValue, "quote", 5)) {
 							CHKERROR(stringBuilder_append(&sb, "'", 1))
@@ -323,9 +330,15 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					goto CONTINUE_OUTER_WHILE;
 			}
 		}
-		CONTINUE_OUTER_WHILE:
-		if(!linkedList_pop2(&stack, &cur, schemeObject_t *)) goto L_END;
-		if(cur != SCHEME_OBJECT_NILL)
+		goto L_SKIP;
+	CONTINUE_OUTER_WHILE:
+		if(env.dot) {
+			CHKERROR(stringBuilder_append(&sb, ")", 1))
+			env.dot = false;
+		}
+	L_SKIP:
+		if(!linkedList_pop2(&stack, &env.cur, toStringEnv_t)) goto L_END;
+		if(env.cur != SCHEME_OBJECT_NILL)
 			CHKERROR(stringBuilder_append(&sb, " ", 1))
 		goto L_START;
 	}

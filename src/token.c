@@ -37,6 +37,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
             return false;
         switch(cur) {
             case ' ': case '\n': break;
+            case '.': out_token->tokenKind = TOKEN_DOT; goto L_PAREN;
             case '(':
                 out_token->tokenKind = TOKEN_PAREN_OPEN;
                 goto L_PAREN;

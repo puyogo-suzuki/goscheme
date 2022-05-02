@@ -8,6 +8,7 @@ typedef enum token_kind {
     TOKEN_PAREN_OPEN,
     TOKEN_QUOTE,
     TOKEN_PAREN_CLOSE,
+    TOKEN_DOT,
     TOKEN_SYMBOL,
     TOKEN_STRING,
     TOKEN_NUMERIC

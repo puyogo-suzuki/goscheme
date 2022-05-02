@@ -8,17 +8,25 @@ typedef struct parseEnv {
 	schemeObject_t * head;
 	schemeObject_t ** tailnext;
 	bool quote;
+	bool dot;
 } parseEnv_t;
 
 gserror_t
 env_append(parseEnv_t * pe, schemeObject_t * so, bool isRefIncrement) {
-	schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-	if (cell == NULL) return ERR_OUT_OF_MEMORY;
-	CHKERROR(schemeObject_new_cons2(cell, so))
-	if(isRefIncrement && so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
-	*pe->tailnext = cell;
-	CHKERROR(gc_ref(&cell->gcInfo))
-	pe->tailnext = &(cell->value.consValue.next);
+	if(pe->tailnext == NULL) return ERR_PARSE_INVALID_DOT;
+	if(pe->dot) {
+		if(isRefIncrement && so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
+		*pe->tailnext = so;
+		pe->tailnext = NULL;
+	} else {
+		schemeObject_t * cell = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+		if (cell == NULL) return ERR_OUT_OF_MEMORY;
+		CHKERROR(schemeObject_new_cons2(cell, so))
+		if(isRefIncrement && so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&so->gcInfo))
+		*pe->tailnext = cell;
+		CHKERROR(gc_ref(&cell->gcInfo))
+		pe->tailnext = &(cell->value.consValue.next);
+	}
 	return ERR_SUCCESS;
 }
 
@@ -57,8 +65,12 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 	schemeObject_t * so = NULL;
 	gserror_t errorReason = ERR_SUCCESS;
 	while (tokenizer_next(input, &ot)) {
-		if (ot.tokenKind == TOKEN_PAREN_OPEN || ot.tokenKind == TOKEN_QUOTE) {
-			parseEnv_t newEnv = { NULL, NULL, false };
+		if (ot.tokenKind == TOKEN_DOT) {
+			if(current == NULL) { errorReason = ERR_PARSE_INVALID_DOT; goto L_FAIL;}
+			if(current->dot || current->tailnext == NULL) { errorReason = ERR_PARSE_INVALID_DOT; goto L_FAIL; }
+			current->dot = true;
+		} else if (ot.tokenKind == TOKEN_PAREN_OPEN || ot.tokenKind == TOKEN_QUOTE) {
+			parseEnv_t newEnv = { NULL, NULL, false, false };
 			PARSE_CHKERROR(linkedList_add2(&envStack, &newEnv, parseEnv_t))
 			current = linkedList_get2(envStack, parseEnv_t);
 			current->head = NULL;

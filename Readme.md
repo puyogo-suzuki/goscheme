@@ -77,7 +77,7 @@ c1up
  - [x] quote
  - [x] negative number
  - [x] escape sequence
- - [ ] dot
+ - [x] dot
  - [x] line comment
   ---
  - [x] define (partial, doesn't support`(define (a b c) (+ b c))`)
