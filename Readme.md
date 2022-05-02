@@ -75,7 +75,7 @@ c1up
  - [ ] Rational Number?
  ---
  - [x] quote
- - [ ] negative number
+ - [x] negative number
  - [ ] escape sequence
  - [ ] dot
  - [ ] comment
