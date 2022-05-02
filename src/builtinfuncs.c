@@ -196,7 +196,7 @@ gserror_t
 builtin_division(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	int32_t retval = 0;
     if(!schemeObject_isList(val)) {
-		errorOut("ERROR", "-", "proper list.");
+		errorOut("ERROR", "/", "proper list.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
     }
     if(val != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(val->gcInfo)))
@@ -219,7 +219,7 @@ builtin_division(machine_t * self, environment_t * env, schemeObject_t * val, ev
     return ERR_SUCCESS;
 
 L_NOT_COMING_NUMBER:
-    errorOut("ERROR", "-", "Not number coming.");
+    errorOut("ERROR", "/", "Not number coming.");
     CHKERROR(gc_deref_schemeObject(cdr))
     CHKERROR(gc_deref_schemeObject(carres))
     return ERR_EVAL_INVALID_OBJECT_TYPE;
