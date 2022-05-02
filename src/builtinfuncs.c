@@ -101,7 +101,7 @@ ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &
     CHKERROR(gc_deref_schemeObject(prev_cdr)) \
 }
 
-#define ARTHMETIC_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
+#define ARITHMETIC_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
 	retval_init \
     if(!schemeObject_isList(val)) { \
@@ -130,10 +130,10 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     return ERR_SUCCESS; \
 } \
 
-ARTHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0;, schemeObject_new_number(outobj, retval), retval += carres->value.numValue;)
-ARTHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1;, schemeObject_new_number(outobj, retval), retval *= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0;, schemeObject_new_number(outobj, retval), retval += carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1;, schemeObject_new_number(outobj, retval), retval *= carres->value.numValue;)
 
-#define ARTHMETIC_LEAST1_FUNC(name, name_str, retval_init, init2, retval_final, updater) gserror_t \
+#define ARITHMETIC_LEAST1_FUNC(name, name_str, retval_init, init2, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
 	retval_init \
     if(!schemeObject_isList(val)) { \
@@ -166,8 +166,8 @@ L_NOT_COMING_NUMBER: \
     return ERR_EVAL_INVALID_OBJECT_TYPE; \
 } \
 
-ARTHMETIC_LEAST1_FUNC(builtin_subtract, "-", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? -carres->value.numValue : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval -= carres->value.numValue;)
-ARTHMETIC_LEAST1_FUNC(builtin_division, "/", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? 0 : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval /= carres->value.numValue;)
+ARITHMETIC_LEAST1_FUNC(builtin_subtract, "-", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? -carres->value.numValue : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval -= carres->value.numValue;)
+ARITHMETIC_LEAST1_FUNC(builtin_division, "/", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? 0 : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval /= carres->value.numValue;)
 
 #define PRED_FUNC(funcname, funcname_str, pred)  ONE_ARGUMENT_FUNC(funcname, funcname_str, { \
     outobj = (pred) ? &predefined_t : &predefined_f; \
