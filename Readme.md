@@ -76,7 +76,7 @@ c1up
  ---
  - [x] quote
  - [x] negative number
- - [ ] escape sequence
+ - [x] escape sequence
  - [ ] dot
  - [x] line comment
   ---

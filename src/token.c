@@ -11,11 +11,27 @@ isNumChar(char ch) {
     return ch >= '0' && ch <= '9';
 }
 
+size_t
+count_length_for_string_literal(string_t * str) {
+    size_t ret = 0;
+    bool prev = false;
+    char ch = 0;
+    for(int i = 0; string_getAt(str, i, &ch) == ERR_SUCCESS; ++i) {
+        if(prev == true) prev = false;
+        else {
+            ret++;
+            if(ch == '\\') prev = true;
+        }
+    }
+    return ret;
+}
+
 bool
 tokenizer_next(tokenizer_t * self, token_t * out_token) {
     size_t startPos;
     string_t subview;
     char cur = '\0';
+    char prevcur = '\0';
     while(true) {
         if(string_getAt(&self->str, self->position, &cur) != ERR_SUCCESS)
             return false;
@@ -54,7 +70,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
         switch(cur) {
             case '\n': goto L_OTHER;
             case ' ': case '(': case ')': if (!isString) goto L_OTHER; else break;
-            case '"': if (isString) goto L_STRING; else goto L_FAIL;
+            case '"': if (prevcur != '\\') { if (isString) goto L_STRING; else goto L_FAIL; } break;
             default:
                 if(isNum && !isNumChar(cur)) {
                     if(firstNegate) {
@@ -64,6 +80,7 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
                 } else break;
         }
         self->position++;
+        prevcur = cur;
     }
 
     if(self->position != startPos) {
@@ -80,7 +97,31 @@ L_PAREN:
 L_STRING:
     self->position++;
     out_token->tokenKind = TOKEN_STRING;
-    return string_substring_deep(&out_token->value.strValue, &self->str, startPos + 1, self->position - startPos - 2) == ERR_SUCCESS;
+    string_t tmp;
+    CHKERROR(string_substring_shallow(&tmp, &self->str, startPos + 1, self->position - startPos - 2))
+    size_t outlength = count_length_for_string_literal(&tmp);
+    CHKERROR(string_new(&out_token->value.strValue, outlength));
+    bool prevEsc = false;
+    for(size_t i = 0, j = 0; string_getAt(&tmp, i, &cur) == ERR_SUCCESS; ++i) {
+        if(prevEsc) {
+            switch(cur) {
+                case 'n': out_token->value.strValue.buffer[j] = '\n'; break;
+                case '"': out_token->value.strValue.buffer[j] = '"'; break;
+                case '\\': out_token->value.strValue.buffer[j] = '\\'; break;
+                default: out_token->value.strValue.buffer[j] = cur; break;
+            }
+            prevEsc = false;
+            j++;
+        } else {
+            if(cur == '\\') {
+                prevEsc = true;
+                continue;
+            }
+            out_token->value.strValue.buffer[j] = cur;
+            j++;
+        }
+    }
+    return true;
 
 L_OTHER:
     string_substring_shallow(&subview, &self->str, startPos, self->position - startPos);
