@@ -84,11 +84,9 @@ tokenizer_next(tokenizer_t * self, token_t * out_token) {
         prevcur = cur;
     }
 
-    if(self->position != startPos) {
-        if(self->position - startPos == 1 && isString)
-            goto L_FAIL;
-        goto L_OTHER;
-    } else goto L_FAIL;
+    if(self->position - startPos == 1 && isString)
+        goto L_FAIL;
+    goto L_OTHER;
 
 L_PAREN:
     string_default(&out_token->value.strValue);
@@ -125,6 +123,8 @@ L_STRING:
     return true;
 
 L_OTHER:
+    if(firstNegate && self->position - startPos == 1)
+        isNum = false;
     string_substring_shallow(&subview, &self->str, startPos, self->position - startPos);
     if (isNum) {
         out_token->tokenKind = TOKEN_NUMERIC;
