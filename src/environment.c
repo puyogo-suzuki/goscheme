@@ -95,6 +95,8 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "boolean?", 8, builtin_booleanp))
 	CHKERROR(addfunc(out, "number?", 7, builtin_numberp))
 	CHKERROR(addfunc(out, "symbol?", 7, builtin_symbolp))
+	CHKERROR(addfunc(out, "list?", 5, builtin_listp))
+	CHKERROR(addfunc(out, "pair?", 5, builtin_pairp))
 	CHKERROR(addfunc(out, "procedure?", 10, builtin_procedurep))
 	CHKERROR(addfunc(out, "string?", 7, builtin_stringp))
 

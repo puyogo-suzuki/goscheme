@@ -171,7 +171,6 @@ ARITHMETIC_LEAST1_FUNC(builtin_division, "/", int32_t retval = 0;, retval = cdr 
 
 #define PRED_FUNC(funcname, funcname_str, pred)  ONE_ARGUMENT_FUNC(funcname, funcname_str, { \
     outobj = (pred) ? &predefined_t : &predefined_f; \
-    CHKERROR(gc_deref_schemeObject(arg0)) \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
 
@@ -179,6 +178,8 @@ PRED_FUNC(builtin_numberp, "number?", arg0->kind == SCHEME_OBJECT_NUMBER)
 PRED_FUNC(builtin_booleanp, "boolean?", arg0 == &predefined_t || arg0 == &predefined_f)
 PRED_FUNC(builtin_stringp, "string?", arg0->kind == SCHEME_OBJECT_STRING)
 PRED_FUNC(builtin_nullp, "null?", arg0 == SCHEME_OBJECT_NILL)
+PRED_FUNC(builtin_pairp, "pair?", arg0->kind == SCHEME_OBJECT_CONS)
+PRED_FUNC(builtin_listp, "list?", schemeObject_isList(arg0))
 PRED_FUNC(builtin_symbolp, "symbol?", arg0->kind == SCHEME_OBJECT_SYMBOL)
 PRED_FUNC(builtin_procedurep, "procedure?", arg0->kind == SCHEME_OBJECT_PROCEDURE || arg0->kind == SCHEME_OBJECT_EXTERN_FUNCTION)
 

@@ -101,8 +101,8 @@ c1up
  - [ ] <=
  - [ ] >
  - [ ] >=
- - [ ] pair?
- - [ ] list?
+ - [x] pair?
+ - [x] list?
  - [x] symbol?
  - [x] car
  - [x] cdr
