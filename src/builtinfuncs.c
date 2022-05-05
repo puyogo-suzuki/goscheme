@@ -25,6 +25,35 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 	return ERR_SUCCESS; \
 } \
 
+#define TWO_ARGUMENT_FUNC(funcname, funcname_str, body, refdec)  gserror_t \
+funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
+	schemeObject_t * outobj;  \
+	if (schemeObject_length(val) != 2) { \
+		errorOut("ERROR", funcname_str, funcname_str" requires 2 arguments."); \
+		return ERR_EVAL_INVALID_OBJECT_TYPE; \
+	} \
+	schemeObject_t * carres = NULL, * arg0 = NULL, * cdrres = NULL, * cadrres = NULL, * arg1 = NULL; \
+	CHKERROR(gc_ref(&(val->gcInfo))) \
+	CHKERROR(schemeObject_car(val, &carres)) \
+    CHKERROR(schemeObject_cdr(val, &cdrres)) \
+    CHKERROR(schemeObject_car(cdrres, &cadrres)) \
+    CHKERROR(gc_deref_schemeObject(val)) \
+    CHKERROR(gc_deref_schemeObject(cdrres)) \
+    CHKERROR(machine_evalforce(self, env, carres, &arg0)) \
+    CHKERROR(machine_evalforce(self, env, cadrres, &arg1)) \
+    CHKERROR(gc_deref_schemeObject(carres)) \
+    CHKERROR(gc_deref_schemeObject(cadrres)) \
+    body \
+    if(refdec) { \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        CHKERROR(gc_deref_schemeObject(arg1)) \
+    } \
+    out->kind = EVALUATIONRESULT_EVALUATED; \
+	out->value.evaluatedValue = outobj; \
+	return ERR_SUCCESS; \
+} \
+
+
 gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (schemeObject_length(val) != 3) {
@@ -54,34 +83,13 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 	return ERR_SUCCESS;
 }
 
-gserror_t
-builtin_cons(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * outobj;
-	if (schemeObject_length(val) != 2) {
-		errorOut("ERROR", "cons", "cons requires 2 arguments.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
-	}
-	schemeObject_t * carres = NULL, * cdrres = NULL, * cadrres = NULL, * carevalres = NULL, * cadrevalres = NULL;
-	CHKERROR(gc_ref(&(val->gcInfo)))
-	CHKERROR(schemeObject_car(val, &carres))
-	CHKERROR(schemeObject_cdr(val, &cdrres))
-	CHKERROR(gc_deref_schemeObject(val))
-	CHKERROR(schemeObject_car(cdrres, &cadrres))
-	CHKERROR(gc_deref_schemeObject(cdrres))
-	CHKERROR(machine_evalforce(self, env, carres, &carevalres))
-	CHKERROR(gc_deref_schemeObject(carres))
-	CHKERROR(machine_evalforce(self, env, cadrres, &cadrevalres))
-	CHKERROR(gc_deref_schemeObject(cadrres))
-	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
-	if(outobj == NULL) return ERR_OUT_OF_MEMORY;
-	CHKERROR(schemeObject_new_cons(outobj, carevalres, cadrevalres))
-	// carevalres, cadrevalresはconsでref incrementしないので，ref decrementしない．
-	// *out が参照しているので，それぞれ1ずつあり，うまくいくはずである．
-	CHKERROR(gc_ref(&(outobj->gcInfo)))
-	out->kind = EVALUATIONRESULT_EVALUATED;
-	out->value.evaluatedValue = outobj;
-	return ERR_SUCCESS;
-}
+TWO_ARGUMENT_FUNC(builtin_cons, "cons", \
+	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+	if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    CHKERROR(schemeObject_new_cons(outobj, arg0, arg1)) \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+, false)
+
 
 ONE_ARGUMENT_FUNC(builtin_car, "car", CHKERROR(schemeObject_car(arg0, &outobj)))
 ONE_ARGUMENT_FUNC(builtin_cdr, "cdr", CHKERROR(schemeObject_cdr(arg0, &outobj)))
@@ -113,7 +121,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     while(cdr != SCHEME_OBJECT_NILL) { \
         READ_HEAD(self, env, car, carres, cdr) \
         if(carres->kind != SCHEME_OBJECT_NUMBER) { \
-            errorOut("ERROR", "+", "Not number coming."); \
+            errorOut("ERROR", name_str, "Not number coming."); \
             CHKERROR(gc_deref_schemeObject(cdr)) \
             CHKERROR(gc_deref_schemeObject(carres)) \
             return ERR_EVAL_INVALID_OBJECT_TYPE; \
@@ -123,15 +131,41 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     } \
     schemeObject_t * outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
     if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
-    CHKERROR(retval_final) \
+    retval_final \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
     out->kind = EVALUATIONRESULT_EVALUATED; \
     out->value.evaluatedValue = outobj; \
     return ERR_SUCCESS; \
 } \
 
-ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , schemeObject_new_number(outobj, retval), retval += carres->value.numValue;)
-ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , schemeObject_new_number(outobj, retval), retval *= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
+
+#define BOOLEAN_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
+name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
+	retval_init \
+    if(!schemeObject_isList(val)) { \
+		errorOut("ERROR", name_str, "proper list."); \
+		return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    } \
+    if(val != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(val->gcInfo))) \
+    schemeObject_t * car, * cdr = val, * carres; \
+    while(cdr != SCHEME_OBJECT_NILL) { \
+        READ_HEAD(self, env, car, carres, cdr) \
+        updater \
+        CHKERROR(gc_deref_schemeObject(carres)) \
+    } \
+    schemeObject_t * outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    retval_final \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+    out->kind = EVALUATIONRESULT_EVALUATED; \
+    out->value.evaluatedValue = outobj; \
+    return ERR_SUCCESS; \
+} \
+
+BOOLEAN_LEAST0_FUNC(builtin_and, "and", bool retval = true; schemeObject_t * lastValue = &predefined_t; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue)); , retval &= (carres != &predefined_f); CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))))
+BOOLEAN_LEAST0_FUNC(builtin_or, "or", bool retval = true; schemeObject_t * lastValue = &predefined_f; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue));, retval |= (carres != &predefined_f); if (carres != &predefined_f) { CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))) })
 
 #define ARITHMETIC_LEAST1_FUNC(name, name_str, arglength_pred, retval_init, init2, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
@@ -190,6 +224,17 @@ PRED_FUNC(builtin_symbolp, "symbol?", arg0->kind == SCHEME_OBJECT_SYMBOL)
 PRED_FUNC(builtin_procedurep, "procedure?", arg0->kind == SCHEME_OBJECT_PROCEDURE || arg0->kind == SCHEME_OBJECT_EXTERN_FUNCTION)
 
 ONE_ARGUMENT_FUNC(builtin_not, "not", { \
-	outobj = (arg0 == &predefined_f) ? &predefined_t : &predefined_f; \
-	CHKERROR(gc_ref(&(outobj->gcInfo))) \
+    outobj = (arg0 == &predefined_f) ? &predefined_t : &predefined_f; \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+ONE_ARGUMENT_FUNC(builtin_length, "length", { \
+    int32_t retVal = schemeObject_length(arg0); \
+    if (retVal == -1) { \
+        errorOut("ERROR", "length", "proper list."); \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    } \
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    CHKERROR(schemeObject_new_number(outobj, retVal))\
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
