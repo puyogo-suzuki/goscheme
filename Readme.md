@@ -116,8 +116,8 @@ c1up
  - [ ] set-cdr!
  - [x] string?
  - [x] string-append
- - [ ] symbol->string
- - [ ] string->symbol
+ - [x] symbol->string
+ - [x] string->symbol
  - [ ] string->number
  - [ ] number->string
  - [x] procedure?(手抜き実装でScheme非互換)

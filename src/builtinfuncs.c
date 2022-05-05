@@ -7,7 +7,7 @@
 
 #define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  gserror_t \
 funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
-	schemeObject_t * outobj;  \
+	schemeObject_t * outobj = NULL;  \
 	if (schemeObject_length(val) != 1) { \
 		errorOut("ERROR", funcname_str, funcname_str" requires 1 argument."); \
 		return ERR_EVAL_INVALID_OBJECT_TYPE; \
@@ -27,7 +27,7 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 
 #define TWO_ARGUMENT_FUNC(funcname, funcname_str, body, refdec)  gserror_t \
 funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
-	schemeObject_t * outobj;  \
+	schemeObject_t * outobj = NULL;  \
 	if (schemeObject_length(val) != 2) { \
 		errorOut("ERROR", funcname_str, funcname_str" requires 2 arguments."); \
 		return ERR_EVAL_INVALID_OBJECT_TYPE; \
@@ -255,10 +255,40 @@ ONE_ARGUMENT_FUNC(builtin_length, "length", { \
     int32_t retVal = schemeObject_length(arg0); \
     if (retVal == -1) { \
         errorOut("ERROR", "length", "proper list."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
         return ERR_EVAL_INVALID_OBJECT_TYPE; \
     } \
     outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
     if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
     CHKERROR(schemeObject_new_number(outobj, retVal))\
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+ONE_ARGUMENT_FUNC(builtin_symbol_string, "symbol->string", { \
+    if (arg0->kind != SCHEME_OBJECT_SYMBOL) {\
+        errorOut("ERROR", "symbol->string", "proper symbol object."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    string_t str = { 0 }; \
+    CHKERROR(string_copy(&str, &(arg0->value.strValue))) \
+    CHKERROR(schemeObject_new_string(outobj, str)) \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+
+ONE_ARGUMENT_FUNC(builtin_string_symbol, "string->symbol", { \
+    if (arg0->kind != SCHEME_OBJECT_STRING) { \
+        errorOut("ERROR", "string->symbol", "proper string object."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    string_t str = { 0 }; \
+    CHKERROR(string_copy(&str, &(arg0->value.symValue))) \
+    CHKERROR(schemeObject_new_symbol(outobj, str)) \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
