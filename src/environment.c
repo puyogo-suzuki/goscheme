@@ -92,6 +92,11 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "-", 1, builtin_subtract))
 	CHKERROR(addfunc(out, "*", 1, builtin_multiplication))
 	CHKERROR(addfunc(out, "/", 1, builtin_division))
+	CHKERROR(addfunc(out, "=", 1, builtin_equate))
+	CHKERROR(addfunc(out, "<", 1, builtin_less))
+	CHKERROR(addfunc(out, "<=", 2, builtin_leq))
+	CHKERROR(addfunc(out, ">", 1, builtin_greater))
+	CHKERROR(addfunc(out, ">=", 2, builtin_geq))
 	CHKERROR(addfunc(out, "boolean?", 8, builtin_booleanp))
 	CHKERROR(addfunc(out, "number?", 7, builtin_numberp))
 	CHKERROR(addfunc(out, "symbol?", 7, builtin_symbolp))
@@ -179,7 +184,7 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 {
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
-	if (!schemeObject_isListLimited(val, 2)) {
+	if (schemeObject_length(val) != 2) {
 		errorOut("ERROR", "define", "requires 2 - length list.");
 		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -209,7 +214,7 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * cadrres = NULL;
 	gserror_t ret = ERR_SUCCESS;
 	CHKERROR(gc_ref(&(val->gcInfo)))
-	if (!schemeObject_isListLimited(val, 2)) {
+	if (schemeObject_length(val) != 2) {
 		errorOut("ERROR", "define", "requires 2 - length list.");
 		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;

@@ -8,7 +8,7 @@
 #define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  gserror_t \
 funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
 	schemeObject_t * outobj;  \
-	if (!schemeObject_isListLimited(val, 1)) { \
+	if (schemeObject_length(val) != 1) { \
 		errorOut("ERROR", funcname_str, funcname_str" requires 1 argument."); \
 		return ERR_EVAL_INVALID_OBJECT_TYPE; \
 	} \
@@ -27,7 +27,7 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 
 gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
-	if (!schemeObject_isListLimited(val, 3)) {
+	if (schemeObject_length(val) != 3) {
 		errorOut("ERROR", "if", "if requires 3 argument.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
@@ -57,7 +57,7 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 gserror_t
 builtin_cons(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	schemeObject_t * outobj;
-	if (!schemeObject_isListLimited(val, 2)) {
+	if (schemeObject_length(val) != 2) {
 		errorOut("ERROR", "cons", "cons requires 2 arguments.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
@@ -130,13 +130,14 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     return ERR_SUCCESS; \
 } \
 
-ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0;, schemeObject_new_number(outobj, retval), retval += carres->value.numValue;)
-ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1;, schemeObject_new_number(outobj, retval), retval *= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , schemeObject_new_number(outobj, retval), retval += carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , schemeObject_new_number(outobj, retval), retval *= carres->value.numValue;)
 
-#define ARITHMETIC_LEAST1_FUNC(name, name_str, retval_init, init2, retval_final, updater) gserror_t \
+#define ARITHMETIC_LEAST1_FUNC(name, name_str, arglength_pred, retval_init, init2, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
 	retval_init \
-    if(!schemeObject_isList(val)) { \
+	int32_t arglen = schemeObject_length(val); \
+    if(arglength_pred) { \
 		errorOut("ERROR", name_str, "proper list."); \
 		return ERR_EVAL_INVALID_OBJECT_TYPE; \
     } \
@@ -153,21 +154,26 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     } \
     schemeObject_t * outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
     if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
-    CHKERROR(retval_final) \
+    retval_final \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
     out->kind = EVALUATIONRESULT_EVALUATED; \
     out->value.evaluatedValue = outobj; \
     return ERR_SUCCESS; \
 \
 L_NOT_COMING_NUMBER: \
-    errorOut("ERROR", "-", "Not number coming."); \
+    errorOut("ERROR", name_str, "Not number coming."); \
     CHKERROR(gc_deref_schemeObject(cdr)) \
     CHKERROR(gc_deref_schemeObject(carres)) \
     return ERR_EVAL_INVALID_OBJECT_TYPE; \
 } \
 
-ARITHMETIC_LEAST1_FUNC(builtin_subtract, "-", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? -carres->value.numValue : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval -= carres->value.numValue;)
-ARITHMETIC_LEAST1_FUNC(builtin_division, "/", int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? 0 : carres->value.numValue;, schemeObject_new_number(outobj, retval), retval /= carres->value.numValue;)
+ARITHMETIC_LEAST1_FUNC(builtin_subtract, "-", arglen < 1, int32_t retval = 0; , retval = cdr == SCHEME_OBJECT_NILL ? -carres->value.numValue : carres->value.numValue; , CHKERROR(schemeObject_new_number(outobj, retval)), retval -= carres->value.numValue;)
+ARITHMETIC_LEAST1_FUNC(builtin_division, "/", arglen < 1, int32_t retval = 0;, retval = cdr == SCHEME_OBJECT_NILL ? 0 : carres->value.numValue;, CHKERROR(schemeObject_new_number(outobj, retval)), retval /= carres->value.numValue;)
+ARITHMETIC_LEAST1_FUNC(builtin_equate, "=", arglen < 2, bool retval = true; int32_t headVal = 0; , headVal = carres->value.numValue;, outobj = retval ? &predefined_t : &predefined_f; , retval &= (headVal == carres->value.numValue);)
+ARITHMETIC_LEAST1_FUNC(builtin_leq, "<=", arglen < 2, bool retval = true; int32_t headVal = 0;, headVal = carres->value.numValue; , outobj = retval ? &predefined_t : &predefined_f;, retval &= (headVal <= carres->value.numValue);)
+ARITHMETIC_LEAST1_FUNC(builtin_less, "<", arglen < 2, bool retval = true; int32_t headVal = 0; , headVal = carres->value.numValue;, outobj = retval ? &predefined_t : &predefined_f; , retval &= (headVal < carres->value.numValue);)
+ARITHMETIC_LEAST1_FUNC(builtin_geq, ">=", arglen < 2, bool retval = true; int32_t headVal = 0;, headVal = carres->value.numValue; , outobj = retval ? &predefined_t : &predefined_f;, retval &= (headVal >= carres->value.numValue);)
+ARITHMETIC_LEAST1_FUNC(builtin_greater, ">", arglen < 2, bool retval = true; int32_t headVal = 0;, headVal = carres->value.numValue; , outobj = retval ? &predefined_t : &predefined_f;, retval &= (headVal > carres->value.numValue);)
 
 #define PRED_FUNC(funcname, funcname_str, pred)  ONE_ARGUMENT_FUNC(funcname, funcname_str, { \
     outobj = (pred) ? &predefined_t : &predefined_f; \

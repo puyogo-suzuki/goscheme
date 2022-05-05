@@ -133,15 +133,15 @@ schemeObject_isList(schemeObject_t * self) {
 	return true;
 }
 
-bool
-schemeObject_isListLimited(schemeObject_t * self, int32_t listLength) {
+int32_t
+schemeObject_length(schemeObject_t * self) {
 	schemeObject_t * cursor = self;
-	int i = 0;
+	int32_t i = 0;
 	for(i = 0; cursor != SCHEME_OBJECT_NILL; ++i) {
-		if(cursor->kind != SCHEME_OBJECT_CONS) return false;
+		if(cursor->kind != SCHEME_OBJECT_CONS) return -1;
 		cursor = cursor->value.consValue.next;
 	}
-	return listLength == i;
+	return i;
 }
 
 gserror_t
@@ -246,7 +246,7 @@ schemeObject_map(struct machine * self, struct environment * env, schemeObject_t
 
 gserror_t
 schemeObject_quote(struct machine * self, struct environment * env, schemeObject_t * val, evaluationResult_t * out) {
-	if (!schemeObject_isListLimited(val, 1)) {
+	if (schemeObject_length(val) != 1) {
 		errorOut("ERROR", "quote", "quote requires 1 argument.");
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}

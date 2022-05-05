@@ -69,8 +69,8 @@ schemeObject_copy(schemeObject_t ** out, schemeObject_t * inobj);
 
 bool
 schemeObject_isList(schemeObject_t * self);
-bool
-schemeObject_isListLimited(schemeObject_t * self, int32_t listLength);
+int32_t
+schemeObject_length(schemeObject_t * self);
 
 gserror_t schemeObject_car(schemeObject_t * self, schemeObject_t ** out);
 gserror_t schemeObject_cdr(schemeObject_t * self, schemeObject_t ** out);
