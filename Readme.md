@@ -124,7 +124,7 @@ c1up
  - [ ] neq?
  - [ ] equal?
  - [x] boolean?
- - [ ] not
+ - [x] not
  - [ ] and
  - [ ] or
  

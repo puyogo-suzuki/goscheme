@@ -42,7 +42,7 @@ DECL_SCHEMEFUNC(builtin_symbolp);
 // DECL_SCHEMEFUNC(builtin_set_car);
 // DECL_SCHEMEFUNC(builtin_set_cdr);
 DECL_SCHEMEFUNC(builtin_booleanp);
-// DECL_SCHEMEFUNC(builtin_not);
+ DECL_SCHEMEFUNC(builtin_not);
 DECL_SCHEMEFUNC(builtin_stringp);
 // DECL_SCHEMEFUNC(builtin_string_append);
 // DECL_SCHEMEFUNC(builtin_symbol_string);

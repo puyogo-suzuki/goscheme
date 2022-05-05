@@ -189,3 +189,7 @@ PRED_FUNC(builtin_listp, "list?", schemeObject_isList(arg0))
 PRED_FUNC(builtin_symbolp, "symbol?", arg0->kind == SCHEME_OBJECT_SYMBOL)
 PRED_FUNC(builtin_procedurep, "procedure?", arg0->kind == SCHEME_OBJECT_PROCEDURE || arg0->kind == SCHEME_OBJECT_EXTERN_FUNCTION)
 
+ONE_ARGUMENT_FUNC(builtin_not, "not", { \
+	outobj = (arg0 == &predefined_f) ? &predefined_t : &predefined_f; \
+	CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
