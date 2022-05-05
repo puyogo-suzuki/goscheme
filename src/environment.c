@@ -109,6 +109,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "pair?", 5, builtin_pairp))
 	CHKERROR(addfunc(out, "procedure?", 10, builtin_procedurep))
 	CHKERROR(addfunc(out, "string?", 7, builtin_stringp))
+	CHKERROR(addfunc(out, "string-append", 13, builtin_string_append))
 
 	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
 	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))

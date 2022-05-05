@@ -107,14 +107,15 @@ c1up
  - [x] car
  - [x] cdr
  - [x] cons
- - [ ] length
+ - [x] list
+ - [x] length
  - [ ] memq
  - [ ] last
  - [ ] append
  - [ ] set-car!
  - [ ] set-cdr!
  - [x] string?
- - [ ] string-append
+ - [x] string-append
  - [ ] symbol->string
  - [ ] string->symbol
  - [ ] string->number
@@ -125,6 +126,6 @@ c1up
  - [ ] equal?
  - [x] boolean?
  - [x] not
- - [ ] and
- - [ ] or
+ - [x] and
+ - [x] or
  

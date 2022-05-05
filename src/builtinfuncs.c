@@ -83,21 +83,21 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 }
 
 TWO_ARGUMENT_FUNC(builtin_cons, "cons", \
-	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
-	if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
-    CHKERROR(schemeObject_new_cons(outobj, arg0, arg1)) \
-    CHKERROR(gc_ref(&(outobj->gcInfo))) \
-, false)
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+        CHKERROR(schemeObject_new_cons(outobj, arg0, arg1)) \
+        CHKERROR(gc_ref(&(outobj->gcInfo))) \
+        , false)
 
 
-ONE_ARGUMENT_FUNC(builtin_car, "car", CHKERROR(schemeObject_car(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cdr, "cdr", CHKERROR(schemeObject_cdr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cadr, "cadr", CHKERROR(schemeObject_cadr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cddr, "cddr", CHKERROR(schemeObject_cddr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_caddr, "caddr", CHKERROR(schemeObject_caddr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cdddr, "cdddr", CHKERROR(schemeObject_cdddr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cadddr, "cadddr", CHKERROR(schemeObject_cadddr(arg0, &outobj)))
-ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &outobj)))
+    ONE_ARGUMENT_FUNC(builtin_car, "car", CHKERROR(schemeObject_car(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cdr, "cdr", CHKERROR(schemeObject_cdr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cadr, "cadr", CHKERROR(schemeObject_cadr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cddr, "cddr", CHKERROR(schemeObject_cddr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_caddr, "caddr", CHKERROR(schemeObject_caddr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cdddr, "cdddr", CHKERROR(schemeObject_cdddr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cadddr, "cadddr", CHKERROR(schemeObject_cadddr(arg0, &outobj)))
+        ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &outobj)))
 
 #define READ_HEAD(self, env, car, carres, cdr)  { \
     schemeObject_t * prev_cdr = cdr; \
@@ -137,8 +137,8 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     return ERR_SUCCESS; \
 } \
 
-ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
-ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
+        ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
+        ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
 
 #define BOOLEAN_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
@@ -154,8 +154,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
         updater \
         CHKERROR(gc_deref_schemeObject(carres)) \
     } \
-    schemeObject_t * outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
-    if(outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    schemeObject_t * outobj = NULL; \
     retval_final \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
     out->kind = EVALUATIONRESULT_EVALUATED; \
@@ -165,6 +164,22 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
 
 BOOLEAN_LEAST0_FUNC(builtin_and, "and", bool retval = true; schemeObject_t * lastValue = &predefined_t; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue)); , retval &= (carres != &predefined_f); CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))))
 BOOLEAN_LEAST0_FUNC(builtin_or, "or", bool retval = true; schemeObject_t * lastValue = &predefined_f; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue));, retval |= (carres != &predefined_f); if (carres != &predefined_f) { CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))) })
+BOOLEAN_LEAST0_FUNC(builtin_string_append, "string-append", \
+    stringBuilder_t sb = {0}; \
+    CHKERROR(stringBuilder_new(&sb)), \
+    string_t str; \
+    CHKERROR(stringBuilder_toString(&str, &sb))\
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    CHKERROR(schemeObject_new_string(outobj, str)), \
+    if (carres->kind != SCHEME_OBJECT_STRING) { \
+        CHKERROR(gc_deref_schemeObject(carres)) \
+        errorOut("ERROR", "string-append", "not String object coming."); \
+        stringBuilder_free(&sb); \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    } \
+    CHKERROR(stringBuilder_append2(&sb, &(carres->value.strValue))) \
+)
 
 #define ARITHMETIC_LEAST1_FUNC(name, name_str, arglength_pred, retval_init, init2, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
