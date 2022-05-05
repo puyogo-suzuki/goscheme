@@ -53,7 +53,6 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 	return ERR_SUCCESS; \
 } \
 
-
 gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (schemeObject_length(val) != 3) {
@@ -227,6 +226,16 @@ ONE_ARGUMENT_FUNC(builtin_not, "not", { \
     outobj = (arg0 == &predefined_f) ? &predefined_t : &predefined_f; \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
+
+gserror_t
+builtin_list(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    schemeObject_t * evaluatedArg = NULL;
+    CHKERROR(schemeObject_map(self, env, &evaluatedArg, val, machine_eval))
+    out->value.evaluatedValue = evaluatedArg;
+    return ERR_SUCCESS;
+}
+
 ONE_ARGUMENT_FUNC(builtin_length, "length", { \
     int32_t retVal = schemeObject_length(arg0); \
     if (retVal == -1) { \
