@@ -118,8 +118,8 @@ c1up
  - [x] string-append
  - [x] symbol->string
  - [x] string->symbol
- - [ ] string->number
- - [ ] number->string
+ - [x] string->number
+ - [x] number->string
  - [x] procedure?(手抜き実装でScheme非互換)
  - [ ] eq?
  - [ ] neq?

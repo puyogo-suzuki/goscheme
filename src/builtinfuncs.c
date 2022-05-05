@@ -90,14 +90,14 @@ TWO_ARGUMENT_FUNC(builtin_cons, "cons", \
         , false)
 
 
-    ONE_ARGUMENT_FUNC(builtin_car, "car", CHKERROR(schemeObject_car(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cdr, "cdr", CHKERROR(schemeObject_cdr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cadr, "cadr", CHKERROR(schemeObject_cadr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cddr, "cddr", CHKERROR(schemeObject_cddr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_caddr, "caddr", CHKERROR(schemeObject_caddr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cdddr, "cdddr", CHKERROR(schemeObject_cdddr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cadddr, "cadddr", CHKERROR(schemeObject_cadddr(arg0, &outobj)))
-        ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_car, "car", CHKERROR(schemeObject_car(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cdr, "cdr", CHKERROR(schemeObject_cdr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cadr, "cadr", CHKERROR(schemeObject_cadr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cddr, "cddr", CHKERROR(schemeObject_cddr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_caddr, "caddr", CHKERROR(schemeObject_caddr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cdddr, "cdddr", CHKERROR(schemeObject_cdddr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cadddr, "cadddr", CHKERROR(schemeObject_cadddr(arg0, &outobj)))
+ONE_ARGUMENT_FUNC(builtin_cddddr, "cddddr", CHKERROR(schemeObject_cddddr(arg0, &outobj)))
 
 #define READ_HEAD(self, env, car, carres, cdr)  { \
     schemeObject_t * prev_cdr = cdr; \
@@ -264,6 +264,33 @@ ONE_ARGUMENT_FUNC(builtin_length, "length", { \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
 
+TWO_ARGUMENT_FUNC(builtin_set_car, "set-car!", { \
+    if(arg0->kind != SCHEME_OBJECT_CONS) { \
+        errorOut("ERROR", "set-car!", "argument 1, proper cons cell."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        CHKERROR(gc_deref_schemeObject(arg1)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    } \
+    CHKERROR(gc_deref_schemeObject(arg0->value.consValue.value)) \
+    CHKERROR(gc_ref(&(arg1->gcInfo))) \
+    arg0->value.consValue.value = arg1; \
+    outobj = SCHEME_OBJECT_NILL; \
+}, true)
+
+
+TWO_ARGUMENT_FUNC(builtin_set_cdr, "set-cdr!", { \
+    if(arg0->kind != SCHEME_OBJECT_CONS) { \
+        errorOut("ERROR", "set-cdr!", "argument 1, proper cons cell."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        CHKERROR(gc_deref_schemeObject(arg1)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    } \
+    CHKERROR(gc_deref_schemeObject(arg0->value.consValue.next)) \
+    CHKERROR(gc_ref(&(arg1->gcInfo))) \
+    arg0->value.consValue.next = arg1; \
+    outobj = SCHEME_OBJECT_NILL; \
+}, true)
+
 ONE_ARGUMENT_FUNC(builtin_symbol_string, "symbol->string", { \
     if (arg0->kind != SCHEME_OBJECT_SYMBOL) {\
         errorOut("ERROR", "symbol->string", "proper symbol object."); \
@@ -290,5 +317,36 @@ ONE_ARGUMENT_FUNC(builtin_string_symbol, "string->symbol", { \
     string_t str = { 0 }; \
     CHKERROR(string_copy(&str, &(arg0->value.symValue))) \
     CHKERROR(schemeObject_new_symbol(outobj, str)) \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+ONE_ARGUMENT_FUNC(builtin_string_number, "string->number", {\
+    if (arg0->kind != SCHEME_OBJECT_STRING) { \
+        errorOut("ERROR", "string->number", "proper string object."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    int32_t retVal = 0; \
+    CHKERROR(string_parseInt(&(arg0->value.strValue), &retVal)) \
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    CHKERROR(schemeObject_new_number(outobj, retVal)) \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+
+ONE_ARGUMENT_FUNC(builtin_number_string, "number->string", { \
+    if (arg0->kind != SCHEME_OBJECT_NUMBER) { \
+        errorOut("ERROR", "number->string", "proper number."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    char str[32]; \
+    snprintf(str, 32, "%d", arg0->value.numValue); \
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    string_t s; \
+    CHKERROR(string_new_deep2(&s, str)) \
+    CHKERROR(schemeObject_new_string(outobj, s)) \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
