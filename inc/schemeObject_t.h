@@ -81,6 +81,11 @@ gserror_t schemeObject_cdddr(schemeObject_t * self, schemeObject_t ** out);
 gserror_t schemeObject_cadddr(schemeObject_t * self, schemeObject_t ** out);
 gserror_t schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out);
 
+bool
+schemeObject_eqp(schemeObject_t * lhs, schemeObject_t * rhs);
+bool
+schemeObject_equalp(schemeObject_t * lhs, schemeObject_t * rhs);
+
 gserror_t
 schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper);
 

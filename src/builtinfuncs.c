@@ -350,3 +350,18 @@ ONE_ARGUMENT_FUNC(builtin_number_string, "number->string", { \
     CHKERROR(schemeObject_new_string(outobj, s)) \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
+
+TWO_ARGUMENT_FUNC(builtin_eqp, "eq?", \
+    outobj = schemeObject_eqp(arg0, arg1) ? &predefined_t : &predefined_f; \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+, true)
+
+TWO_ARGUMENT_FUNC(builtin_neqp, "neq?", \
+    outobj = schemeObject_eqp(arg0, arg1) ? &predefined_f : &predefined_t; \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+, true)
+
+TWO_ARGUMENT_FUNC(builtin_equalp, "equal?", \
+    outobj = schemeObject_equalp(arg0, arg1) ? &predefined_t : &predefined_f; \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+, true)

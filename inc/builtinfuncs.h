@@ -50,7 +50,7 @@ DECL_SCHEMEFUNC(builtin_string_append);
  DECL_SCHEMEFUNC(builtin_string_number);
  DECL_SCHEMEFUNC(builtin_number_string);
 DECL_SCHEMEFUNC(builtin_procedurep);
-// DECL_SCHEMEFUNC(builtin_eq);
-// DECL_SCHEMEFUNC(builtin_neq);
-// DECL_SCHEMEFUNC(builtin_equal);
+ DECL_SCHEMEFUNC(builtin_eqp);
+ DECL_SCHEMEFUNC(builtin_neqp);
+ DECL_SCHEMEFUNC(builtin_equalp);
 

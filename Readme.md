@@ -112,8 +112,8 @@ c1up
  - [ ] memq
  - [ ] last
  - [ ] append
- - [ ] set-car!
- - [ ] set-cdr!
+ - [x] set-car!
+ - [x] set-cdr!
  - [x] string?
  - [x] string-append
  - [x] symbol->string
@@ -121,9 +121,9 @@ c1up
  - [x] string->number
  - [x] number->string
  - [x] procedure?(手抜き実装でScheme非互換)
- - [ ] eq?
- - [ ] neq?
- - [ ] equal?
+ - [x] eq?
+ - [x] neq?
+ - [x] equal?
  - [x] boolean?
  - [x] not
  - [x] and

@@ -220,6 +220,50 @@ schemeObject_cddddr(schemeObject_t * self, schemeObject_t ** out) {
 	return ERR_SUCCESS;
 }
 
+bool
+schemeObject_eqp(schemeObject_t * lhs, schemeObject_t * rhs) {
+	if(lhs == rhs) return true;
+	if(lhs == SCHEME_OBJECT_NILL || rhs == SCHEME_OBJECT_NILL) return false;
+	if(lhs->kind != rhs->kind) return false;
+	switch (lhs->kind) {
+	case SCHEME_OBJECT_EXTERN_FUNCTION:
+		return lhs->value.extFuncValue.func == rhs->value.extFuncValue.func
+			&& lhs->value.extFuncValue.environment == rhs->value.extFuncValue.environment;
+	case SCHEME_OBJECT_NUMBER:
+		return lhs->value.numValue == rhs->value.numValue;
+	case SCHEME_OBJECT_PROCEDURE:
+		return lhs->value.procedureValue.body == rhs->value.procedureValue.body
+			&& lhs->value.procedureValue.environment == rhs->value.procedureValue.environment;
+	case SCHEME_OBJECT_CONS:
+		return lhs->value.consValue.value == rhs->value.consValue.value
+			&& lhs->value.consValue.next == rhs->value.consValue.next;
+	case SCHEME_OBJECT_STRING:
+		return lhs->value.strValue.buffer == rhs->value.strValue.buffer;
+	case SCHEME_OBJECT_SYMBOL:
+		return lhs->value.symValue.buffer == rhs->value.symValue.buffer;
+	}
+	return false;
+}
+
+bool
+schemeObject_equalp(schemeObject_t * lhs, schemeObject_t * rhs) {
+	if(lhs == rhs) return true;
+	if(lhs == SCHEME_OBJECT_NILL || rhs == SCHEME_OBJECT_NILL) return false;
+	if(lhs->kind != rhs->kind) return false;
+	switch (lhs->kind) {
+	case SCHEME_OBJECT_EXTERN_FUNCTION: case SCHEME_OBJECT_NUMBER: case SCHEME_OBJECT_PROCEDURE:
+		return schemeObject_eqp(lhs, rhs);
+	case SCHEME_OBJECT_CONS:
+		return schemeObject_equalp(lhs->value.consValue.value, rhs->value.consValue.value)
+			&& schemeObject_equalp(lhs->value.consValue.next, rhs->value.consValue.next);
+	case SCHEME_OBJECT_STRING:
+		return string_equals(&(lhs->value.strValue), &(rhs->value.strValue));
+	case SCHEME_OBJECT_SYMBOL:
+		return string_equals(&(lhs->value.symValue), &(rhs->value.symValue));
+	}
+	return false;
+}
+
 gserror_t
 schemeObject_map(struct machine * self, struct environment * env, schemeObject_t ** out, schemeObject_t * inobj, schemeFunction_t * mapper) {
 	schemeObject_t ** writeTo = out;

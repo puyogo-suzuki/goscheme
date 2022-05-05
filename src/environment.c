@@ -117,6 +117,10 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "string->number", 14, builtin_string_number))
 	CHKERROR(addfunc(out, "number->string", 14, builtin_number_string))
 
+	CHKERROR(addfunc(out, "eq?", 3, builtin_eqp))
+	CHKERROR(addfunc(out, "neq?", 4, builtin_neqp))
+	CHKERROR(addfunc(out, "equal?", 6, builtin_equalp))
+
 	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
 	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))
 	return ERR_SUCCESS;
