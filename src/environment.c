@@ -196,9 +196,8 @@ environment_setq2(struct machine * self, environment_t * env, string_t * name, s
 }
 
 gserror_t
-environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)
-{
-	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL;
+environment_setq(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * caar = NULL, * cdar = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	if (schemeObject_length(val) != 2) {
 		errorOut("ERROR", "define", "requires 2 - length list.");
@@ -206,23 +205,55 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
 	CHKERROR(schemeObject_car(val, &car))
-	if (car->kind != SCHEME_OBJECT_SYMBOL) {
-		errorOut("ERROE", "define", "1st argument must be symbol.");
+	switch (car->kind) {
+	case SCHEME_OBJECT_SYMBOL:
+		CHKERROR(schemeObject_cdr(val, &cdr))
+		CHKERROR(schemeObject_car(cdr, &cadr))
+		CHKERROR(environment_setq2(self, env, &car->value.strValue, cadr))
+		CHKERROR(gc_deref_schemeObject(cadr))
+		CHKERROR(gc_deref_schemeObject(cdr))
+		CHKERROR(gc_deref_schemeObject(val))
+		out->kind = EVALUATIONRESULT_EVALUATED;
+		out->value.evaluatedValue = car;
+		return ERR_SUCCESS;
+	case SCHEME_OBJECT_CONS:
+		CHKERROR(schemeObject_car(car, &caar))
+		CHKERROR(gc_deref_schemeObject(car))
+		if (caar->kind != SCHEME_OBJECT_SYMBOL) {
+			errorOut("ERROE", "define", "(car (1st argument)) must be symbol.");
+			CHKERROR(gc_deref_schemeObject(caar))
+			CHKERROR(gc_deref_schemeObject(val))
+			return ERR_EVAL_INVALID_OBJECT_TYPE;
+		}
+		CHKERROR(schemeObject_cdr(car, &cdar))
+		CHKERROR(schemeObject_cdr(val, &cdr))
+		schemeObject_t * lambdaObj = NULL;
+		{
+			evaluationResult_t er = { 0 };
+			lambdaObj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+			if (lambdaObj == NULL) return ERR_OUT_OF_MEMORY;
+			CHKERROR(schemeObject_new_cons(lambdaObj, cdar, cdr))
+			CHKERROR(gc_ref(&(lambdaObj->gcInfo)))
+			CHKERROR(machine_lambda(self, env, lambdaObj, &er))
+			CHKERROR(gc_deref_schemeObject(lambdaObj))
+			CHKERROR(machine_makeforce(self, er, &lambdaObj))
+		}
+		CHKERROR(environment_setq2(self, env, &caar->value.strValue, lambdaObj));
+		CHKERROR(gc_deref_schemeObject(lambdaObj))
+		//CHKERROR(gc_deref_schemeObject(cdar))  // <- schemeObject_new_cons doesn't ref count up.
+		//CHKERROR(gc_deref_schemeObject(cdr))   // <- schemeObject_new_cons doesn't ref count up.
+		CHKERROR(gc_deref_schemeObject(val))
+		out->kind = EVALUATIONRESULT_EVALUATED;
+		out->value.evaluatedValue = caar;
+		return ERR_SUCCESS;
+	default:
+		errorOut("ERROE", "define", "1st argument must be symbol or list.");
 		CHKERROR(gc_deref_schemeObject(car))
 		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
-	CHKERROR(schemeObject_cdr(val, &cdr))
-	CHKERROR(schemeObject_car(cdr, &cadr))
-	CHKERROR(environment_setq2(self, env, &car->value.strValue, cadr))
-	CHKERROR(gc_deref_schemeObject(cadr))
-	CHKERROR(gc_deref_schemeObject(cdr))
-	CHKERROR(gc_deref_schemeObject(val))
-	out->kind = EVALUATIONRESULT_EVALUATED;
-	out->value.evaluatedValue = car;
 	return ERR_SUCCESS;
 }
-
 
 gserror_t
 environment_set_destructive(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out)

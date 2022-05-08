@@ -80,7 +80,7 @@ c1up
  - [x] dot
  - [x] line comment
   ---
- - [x] define (partial, doesn't support`(define (a b c) (+ b c))`)
+ - [x] define
  - [x] quote
  - [x] lambda
  - [x] set!
