@@ -1,4 +1,5 @@
 #include "error.h"
+bool error_OOMRecoverByFreeing = true;
 
 #if _ESP
 #include "esp_cpp_ffi.h"

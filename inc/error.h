@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-static bool error_OOMRecoverByFreeing = true;
+extern bool error_OOMRecoverByFreeing;
 
 typedef enum {
 	ERR_SUCCESS = 0,
