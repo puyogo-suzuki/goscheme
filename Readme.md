@@ -110,7 +110,7 @@ c1up
  - [x] list
  - [x] length
  - [x] memq
- - [ ] last
+ - [x] last
  - [x] append
  - [x] set-car!
  - [x] set-cdr!

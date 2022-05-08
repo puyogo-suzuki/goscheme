@@ -315,6 +315,22 @@ TWO_ARGUMENT_FUNC(builtin_memq, "memq", { \
     } \
 }, true)
 
+ONE_ARGUMENT_FUNC(builtin_last, "last", { \
+    schemeObject_t * cur = arg0; \
+    outobj = SCHEME_OBJECT_NILL; \
+    if(arg0 != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(arg0->gcInfo))) \
+    while(cur != SCHEME_OBJECT_NILL) { \
+        schemeObject_t * prev = cur; \
+        CHKERROR(schemeObject_cdr(prev, &cur)) \
+        if(cur == SCHEME_OBJECT_NILL) { \
+            schemeObject_t * car = NULL; \
+            CHKERROR(schemeObject_car(prev, &car)) \
+            outobj = car; \
+        } \
+        CHKERROR(gc_deref_schemeObject(prev)) \
+    } \
+})
+
 TWO_ARGUMENT_FUNC(builtin_set_car, "set-car!", { \
     if(arg0->kind != SCHEME_OBJECT_CONS) { \
         errorOut("ERROR", "set-car!", "argument 1, proper cons cell."); \
