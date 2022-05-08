@@ -4,7 +4,9 @@
 ## requirements
  - OS : macOS, DragonFlyBSD, FreeBSD, Windows 11 (maybe Linux)
  - GNU make
- - Compiler : APPLE Clang or Clang or GCC or Visual C++ 2019
+ - Compiler : APPLE Clang or Clang or Visual C++ 2019
+
+GCC cannot compile due to "error: backslash-newline at end of file"
 
 Below microcomputers could run.
  - ESP32(not included in this repository)
