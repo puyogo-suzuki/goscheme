@@ -106,6 +106,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "and", 3, builtin_and))
 	CHKERROR(addfunc(out, "or", 2, builtin_or))
 	CHKERROR(addfunc(out, "list", 4, builtin_list))
+	CHKERROR(addfunc(out, "append", 6, builtin_append))
 	CHKERROR(addfunc(out, "length", 6, builtin_length))
 	CHKERROR(addfunc(out, "boolean?", 8, builtin_booleanp))
 	CHKERROR(addfunc(out, "number?", 7, builtin_numberp))
@@ -303,10 +304,11 @@ environment_let_internal(struct machine * self, environment_t * env, schemeObjec
 		CHKERROR(gc_deref_schemeObject(prev))
 	}
 	CHKERROR(schemeObject_cdr(val, &cdr))
-	CHKERROR(machine_begin(val, the_env, cdr, out))
+	CHKERROR(machine_begin(self, the_env, cdr, out))
 	CHKERROR(gc_deref_environment(the_env))
 	CHKERROR(gc_deref_schemeObject(cdr))
 	CHKERROR(gc_deref_schemeObject(val))
+	return ERR_SUCCESS;
 }
 
 gserror_t

@@ -84,9 +84,9 @@ c1up
  - [x] quote
  - [x] lambda
  - [x] set!
- - [ ] let
- - [ ] let*
- - [ ] letrec
+ - [x] let  (same as letrec)
+ - [x] let* (same as letrec*)
+ - [x] letrec
  - [x] if
  - [ ] cond
  - [x] begin
@@ -111,7 +111,7 @@ c1up
  - [x] length
  - [ ] memq
  - [ ] last
- - [ ] append
+ - [x] append
  - [x] set-car!
  - [x] set-cdr!
  - [x] string?

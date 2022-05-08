@@ -264,6 +264,37 @@ ONE_ARGUMENT_FUNC(builtin_length, "length", { \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 })
 
+TWO_ARGUMENT_FUNC(builtin_append, "append", { \
+    schemeObject_t * cur = arg0; \
+    schemeObject_t ** tail = &outobj; \
+    outobj = SCHEME_OBJECT_NILL; \
+    while(cur != SCHEME_OBJECT_NILL) { \
+        schemeObject_t * prev = cur; \
+        schemeObject_t * car = NULL; \
+        CHKERROR(schemeObject_car(cur, &car)) \
+        *tail = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+        if(*tail == NULL) return ERR_OUT_OF_MEMORY; \
+        CHKERROR(schemeObject_new_cons(*tail, car, SCHEME_OBJECT_NILL)) \
+        CHKERROR(gc_ref(&((*tail)->gcInfo))) \
+        tail = &((*tail)->value.consValue.next); \
+        CHKERROR(schemeObject_cdr(prev, &cur)) \
+        CHKERROR(gc_deref_schemeObject(prev)) \
+    } \
+    cur = arg1; \
+    while(cur != SCHEME_OBJECT_NILL) { \
+        schemeObject_t * prev = cur; \
+        schemeObject_t * car = NULL; \
+        CHKERROR(schemeObject_car(cur, &car)) \
+        *tail = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+        if(*tail == NULL) return ERR_OUT_OF_MEMORY; \
+        CHKERROR(schemeObject_new_cons(*tail, car, SCHEME_OBJECT_NILL)) \
+        CHKERROR(gc_ref(&((*tail)->gcInfo))) \
+        tail = &((*tail)->value.consValue.next); \
+        CHKERROR(schemeObject_cdr(prev, &cur)) \
+        CHKERROR(gc_deref_schemeObject(prev)) \
+    } \
+}, false)
+
 TWO_ARGUMENT_FUNC(builtin_set_car, "set-car!", { \
     if(arg0->kind != SCHEME_OBJECT_CONS) { \
         errorOut("ERROR", "set-car!", "argument 1, proper cons cell."); \

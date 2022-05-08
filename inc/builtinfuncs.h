@@ -35,7 +35,7 @@ DECL_SCHEMEFUNC(builtin_list);
 DECL_SCHEMEFUNC(builtin_length);
 // DECL_SCHEMEFUNC(builtin_memq);
 // DECL_SCHEMEFUNC(builtin_last);
-// DECL_SCHEMEFUNC(builtin_append);
+ DECL_SCHEMEFUNC(builtin_append);
  DECL_SCHEMEFUNC(builtin_set_car);
  DECL_SCHEMEFUNC(builtin_set_cdr);
 DECL_SCHEMEFUNC(builtin_booleanp);
