@@ -137,8 +137,8 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     return ERR_SUCCESS; \
 } \
 
-        ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
-        ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
 
 #define BOOLEAN_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
@@ -294,6 +294,26 @@ TWO_ARGUMENT_FUNC(builtin_append, "append", { \
         CHKERROR(gc_deref_schemeObject(prev)) \
     } \
 }, false)
+
+
+TWO_ARGUMENT_FUNC(builtin_memq, "memq", { \
+    schemeObject_t * cur = arg0; \
+    outobj = SCHEME_OBJECT_NILL; \
+    if(arg0 != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(arg0->gcInfo))) \
+    while(cur != SCHEME_OBJECT_NILL) { \
+        schemeObject_t * prev = cur; \
+        schemeObject_t * car = NULL; \
+        CHKERROR(schemeObject_car(cur, &car)) \
+        if(schemeObject_eqp(car, arg1)) { \
+            outobj = cur; \
+            CHKERROR(gc_deref_schemeObject(car)) \
+            break; \
+        } \
+        CHKERROR(gc_deref_schemeObject(car)) \
+        CHKERROR(schemeObject_cdr(prev, &cur)) \
+        CHKERROR(gc_deref_schemeObject(prev)) \
+    } \
+}, true)
 
 TWO_ARGUMENT_FUNC(builtin_set_car, "set-car!", { \
     if(arg0->kind != SCHEME_OBJECT_CONS) { \

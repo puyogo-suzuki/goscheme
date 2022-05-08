@@ -109,7 +109,7 @@ c1up
  - [x] cons
  - [x] list
  - [x] length
- - [ ] memq
+ - [x] memq
  - [ ] last
  - [x] append
  - [x] set-car!
