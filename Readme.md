@@ -2,11 +2,9 @@
  **NOT** SCHEME IMPLEMENTATION BY **GOLANG**.
 
 ## requirements
- - OS : macOS, DragonFlyBSD, FreeBSD, Windows 11 (maybe Linux)
- - GNU make
- - Compiler : APPLE Clang or Clang or Visual C++ 2019
-
-GCC cannot compile due to "error: backslash-newline at end of file"
+ - OS : macOS, DragonFlyBSD, FreeBSD, Windows 11/10 (maybe Linux)
+ - GNU make(Excluding Windows)
+ - Compiler : APPLE Clang or GCC or Clang or Visual C++ 2015-2022
 
 Below microcomputers could run.
  - ESP32(not included in this repository)
