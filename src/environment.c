@@ -70,6 +70,11 @@ environment_new_global(environment_t * out)
 	CHKERROR(environment_new(out, NULL))
 	CHKERROR(gc_ref(&(out->gcInfo)))
 	// TODO:Implement buildin function.
+	// TODO: Implement let* and let correctly?
+	CHKERROR(addfunc(out, "let*", 4, environment_letaster))
+	CHKERROR(addfunc(out, "let", 3, environment_let))
+	CHKERROR(addfunc(out, "letrec*", 7, environment_letaster))
+	CHKERROR(addfunc(out, "letrec", 6, environment_let))
 	CHKERROR(addfunc(out, "define", 6, environment_setq))
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote))
 	CHKERROR(addfunc(out, "car", 3, builtin_car))
@@ -186,12 +191,12 @@ environment_setq3(struct machine * self, environment_t * env, string_t * name, s
 }
 
 gserror_t
-environment_setq2(struct machine * self, environment_t * env, string_t * name, schemeObject_t * val) {
+environment_setq2(struct machine * self, environment_t * env, environment_t * defineto, string_t * name, schemeObject_t * val) {
 	schemeObject_t * valres = NULL;
 	string_t s;
 	CHKERROR(machine_evalforce(self, env, val, &valres)) // valres.rc++;
 	string_copy(&s, name);
-	CHKERROR(environment_register(env, s, valres))
+	CHKERROR(environment_register(defineto, s, valres))
 	return ERR_SUCCESS;
 }
 
@@ -209,7 +214,7 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 	case SCHEME_OBJECT_SYMBOL:
 		CHKERROR(schemeObject_cdr(val, &cdr))
 		CHKERROR(schemeObject_car(cdr, &cadr))
-		CHKERROR(environment_setq2(self, env, &car->value.strValue, cadr))
+		CHKERROR(environment_setq2(self, env, env, &car->value.strValue, cadr))
 		CHKERROR(gc_deref_schemeObject(cadr))
 		CHKERROR(gc_deref_schemeObject(cdr))
 		CHKERROR(gc_deref_schemeObject(val))
@@ -220,7 +225,7 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 		CHKERROR(schemeObject_car(car, &caar))
 		CHKERROR(gc_deref_schemeObject(car))
 		if (caar->kind != SCHEME_OBJECT_SYMBOL) {
-			errorOut("ERROE", "define", "(car (1st argument)) must be symbol.");
+			errorOut("ERROR", "define", "(car (1st argument)) must be symbol.");
 			CHKERROR(gc_deref_schemeObject(caar))
 			CHKERROR(gc_deref_schemeObject(val))
 			return ERR_EVAL_INVALID_OBJECT_TYPE;
@@ -238,7 +243,7 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 			CHKERROR(gc_deref_schemeObject(lambdaObj))
 			CHKERROR(machine_makeforce(self, er, &lambdaObj))
 		}
-		CHKERROR(environment_setq2(self, env, &caar->value.strValue, lambdaObj));
+		CHKERROR(environment_setq2(self, env, env, &caar->value.strValue, lambdaObj));
 		CHKERROR(gc_deref_schemeObject(lambdaObj))
 		//CHKERROR(gc_deref_schemeObject(cdar))  // <- schemeObject_new_cons doesn't ref count up.
 		//CHKERROR(gc_deref_schemeObject(cdr))   // <- schemeObject_new_cons doesn't ref count up.
@@ -247,12 +252,71 @@ environment_setq(struct machine * self, environment_t * env, schemeObject_t * va
 		out->value.evaluatedValue = caar;
 		return ERR_SUCCESS;
 	default:
-		errorOut("ERROE", "define", "1st argument must be symbol or list.");
+		errorOut("ERROR", "define", "1st argument must be symbol or list.");
 		CHKERROR(gc_deref_schemeObject(car))
 		CHKERROR(gc_deref_schemeObject(val))
 		return ERR_EVAL_INVALID_OBJECT_TYPE;
 	}
 	return ERR_SUCCESS;
+}
+
+gserror_t
+environment_let_internal(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out, bool isAster) {
+	schemeObject_t * cur = NULL, * cdr = NULL;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	if(!schemeObject_isList(val)) {
+		errorOut("ERROR", "let", "proper list.");
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_car(val, &cur))
+	environment_t * the_env = NULL;
+	the_env = (environment_t *)reallocarray(NULL, 1, sizeof(environment_t));
+	if(the_env == NULL) return ERR_OUT_OF_MEMORY;
+	CHKERROR(environment_new(the_env, env))
+	CHKERROR(gc_ref(&(env->gcInfo)))
+	CHKERROR(gc_ref(&(the_env->gcInfo)))
+	while (cur != SCHEME_OBJECT_NILL) {
+		schemeObject_t * prev = cur, * cur_val = NULL, * car = NULL, * cadr = NULL;
+		if (cur->kind != SCHEME_OBJECT_CONS) {
+			errorOut("ERROR", "let", "invalid format.");
+			CHKERROR(gc_deref_schemeObject(cur))
+			CHKERROR(gc_deref_schemeObject(val))
+			return ERR_EVAL_INVALID_OBJECT_TYPE;
+		}
+		CHKERROR(schemeObject_car(cur, &cur_val))
+		if (schemeObject_length(cur_val) != 2) {
+			errorOut("ERROR", "let", "invalid format.");
+			CHKERROR(gc_deref_schemeObject(cur_val))
+			CHKERROR(gc_deref_schemeObject(cur))
+			CHKERROR(gc_deref_schemeObject(val))
+			return ERR_EVAL_INVALID_OBJECT_TYPE;
+		}
+		CHKERROR(schemeObject_car(cur_val, &car))
+		CHKERROR(schemeObject_cadr(cur_val, &cadr))
+		CHKERROR(environment_setq2(self, isAster ? the_env : env, the_env, &car->value.strValue, cadr))
+		CHKERROR(gc_deref_schemeObject(car))
+		CHKERROR(gc_deref_schemeObject(cadr))
+		CHKERROR(gc_deref_schemeObject(cur_val))
+
+		CHKERROR(schemeObject_cdr(cur, &cur))
+		CHKERROR(gc_deref_schemeObject(prev))
+	}
+	CHKERROR(schemeObject_cdr(val, &cdr))
+	CHKERROR(machine_begin(val, the_env, cdr, out))
+	CHKERROR(gc_deref_environment(the_env))
+	CHKERROR(gc_deref_schemeObject(cdr))
+	CHKERROR(gc_deref_schemeObject(val))
+}
+
+gserror_t
+environment_let(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+	return environment_let_internal(self, env, val, out, false);
+}
+
+gserror_t
+environment_letaster(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+	return environment_let_internal(self, env, val, out, true);
 }
 
 gserror_t

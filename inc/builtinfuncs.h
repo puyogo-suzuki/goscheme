@@ -1,9 +1,6 @@
 #include "schemeObject_t.h"
 
 // // Special Functions!
-// DECL_SCHEMEFUNC(builtin_let);
-// DECL_SCHEMEFUNC(builtin_letaster);
-// DECL_SCHEMEFUNC(builtin_letrec);
 DECL_SCHEMEFUNC(builtin_if);
 // DECL_SCHEMEFUNC(buildin_cond);
 
