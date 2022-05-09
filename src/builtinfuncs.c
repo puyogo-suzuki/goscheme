@@ -10,7 +10,7 @@
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #if __clang__
-#pragma clang diagnostic ignored "-Wunsed-but-set-variable"
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
 #define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  gserror_t \
