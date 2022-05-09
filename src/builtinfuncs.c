@@ -5,62 +5,6 @@
 #include "common.h"
 #include "schemeObject_predefined_object.h"
 
-// gcc and clang seem to be unable to analysis variables usage with macro correctly.
-#if __GNUC__
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#if __clang__
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-
-#define ONE_ARGUMENT_FUNC(funcname, funcname_str, body)  gserror_t \
-funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
-	schemeObject_t * outobj = NULL;  \
-	if (schemeObject_length(val) != 1) { \
-		errorOut("ERROR", funcname_str, funcname_str" requires 1 argument."); \
-		return ERR_EVAL_INVALID_OBJECT_TYPE; \
-	} \
-	schemeObject_t * carres = NULL, * arg0 = NULL; \
-	CHKERROR(gc_ref(&(val->gcInfo))) \
-	CHKERROR(schemeObject_car(val, &carres)) \
-	CHKERROR(gc_deref_schemeObject(val)) \
-	CHKERROR(machine_evalforce(self, env, carres, &arg0)) \
-	CHKERROR(gc_deref_schemeObject(carres)) \
-	body \
-	CHKERROR(gc_deref_schemeObject(arg0)) \
-	out->kind = EVALUATIONRESULT_EVALUATED; \
-	out->value.evaluatedValue = outobj; \
-	return ERR_SUCCESS; \
-}
-
-#define TWO_ARGUMENT_FUNC(funcname, funcname_str, body, refdec)  gserror_t \
-funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
-    schemeObject_t * outobj = NULL;  \
-    if (schemeObject_length(val) != 2) { \
-        errorOut("ERROR", funcname_str, funcname_str" requires 2 arguments."); \
-        return ERR_EVAL_INVALID_OBJECT_TYPE; \
-    } \
-    schemeObject_t * carres = NULL, * arg0 = NULL, * cdrres = NULL, * cadrres = NULL, * arg1 = NULL; \
-    CHKERROR(gc_ref(&(val->gcInfo))) \
-    CHKERROR(schemeObject_car(val, &carres)) \
-    CHKERROR(schemeObject_cdr(val, &cdrres)) \
-    CHKERROR(schemeObject_car(cdrres, &cadrres)) \
-    CHKERROR(gc_deref_schemeObject(val)) \
-    CHKERROR(gc_deref_schemeObject(cdrres)) \
-    CHKERROR(machine_evalforce(self, env, carres, &arg0)) \
-    CHKERROR(machine_evalforce(self, env, cadrres, &arg1)) \
-    CHKERROR(gc_deref_schemeObject(carres)) \
-    CHKERROR(gc_deref_schemeObject(cadrres)) \
-    body \
-    if(refdec) { \
-        CHKERROR(gc_deref_schemeObject(arg0)) \
-        CHKERROR(gc_deref_schemeObject(arg1)) \
-    } \
-    out->kind = EVALUATIONRESULT_EVALUATED; \
-	out->value.evaluatedValue = outobj; \
-	return ERR_SUCCESS; \
-}
-
 gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (schemeObject_length(val) != 3) {
@@ -205,7 +149,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     while(cdr != SCHEME_OBJECT_NILL) { \
         READ_HEAD(self, env, car, carres, cdr) \
         if(carres->kind != SCHEME_OBJECT_NUMBER) goto L_NOT_COMING_NUMBER; \
-        retval -= carres->value.numValue; \
+        updater \
         CHKERROR(gc_deref_schemeObject(carres)) \
     } \
     schemeObject_t * outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
