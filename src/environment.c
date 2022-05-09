@@ -6,6 +6,9 @@
 #include "io.h"
 #include "schemeObject_predefined_object.h"
 #include "builtinfuncs.h"
+#if _ESP
+#include "esp32peripheral.h"
+#endif
 
 typedef struct hashItem {
 	string_t name;
@@ -131,6 +134,24 @@ environment_new_global(environment_t * out)
 
 	CHKERROR(addsymbol(out, "#f", 2,  &predefined_f))
 	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))
+
+
+	#if _ESP
+	CHKERROR(addfunc(out, "lcd-drawpixel", 13, schemefunc_esp_lcdDrawPixel))
+	CHKERROR(addfunc(out, "lcd-drawline", 12, schemefunc_esp_lcdDrawLine))
+	CHKERROR(addfunc(out, "lcd-fillrect", 12, schemefunc_esp_lcdFillRect))
+	CHKERROR(addfunc(out, "lcd-fillscreen", 14, schemefunc_esp_lcdFillScreen))
+	CHKERROR(addfunc(out, "lcd-setcursor", 13, schemefunc_esp_lcdSetCursor))
+	CHKERROR(addfunc(out, "lcd-settextcolor", 16, schemefunc_esp_lcdSetTextColor))
+	CHKERROR(addfunc(out, "lcd-settextsize", 15, schemefunc_esp_lcdSetTextSize))
+	CHKERROR(addfunc(out, "lcd-print", 9, schemefunc_esp_lcdPrint))
+	CHKERROR(addfunc(out, "lcd-dbg", 7, schemefunc_esp_lcdDbg))
+	CHKERROR(addfunc(out, "sleep", 5, schemefunc_esp_M5Sleep))
+	CHKERROR(addfunc(out, "m5-update", 9, schemefunc_esp_M5Update))
+	CHKERROR(addfunc(out, "buttonA-press?", 14, schemefunc_esp_buttonAPressp))
+	CHKERROR(addfunc(out, "buttonB-press?", 14, schemefunc_esp_buttonBPressp))
+	CHKERROR(addfunc(out, "buttonC-press?", 14, schemefunc_esp_buttonCPressp))
+	#endif
 	return ERR_SUCCESS;
 }
 

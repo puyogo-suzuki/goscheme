@@ -5,7 +5,12 @@ bool error_OOMRecoverByFreeing = true;
 #include "esp_cpp_ffi.h"
 void
 errorOut(const char * errorLevel, const char * moduleName, const char * message) {
-	serialPrintf("[%s] %s: %s\n", errorLevel, moduleName, message);
+	serialOut4("[");
+	serialOut4(errorLevel);
+	serialOut4("] ");
+	serialOut4(moduleName);
+	serialOut4(": ");
+	serialOut(message);
 }
 
 #else
