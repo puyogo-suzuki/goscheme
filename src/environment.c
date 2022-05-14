@@ -92,6 +92,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "cons", 4, builtin_cons))
 	CHKERROR(addfunc(out, "if", 2, builtin_if))
 	CHKERROR(addfunc(out, "cond", 4, builtin_cond))
+	CHKERROR(addfunc(out, "do", 2, builtin_do))
 	CHKERROR(addfunc(out, "begin", 5, machine_begin))
 	CHKERROR(addfunc(out, "lambda", 6, machine_lambda))
 	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive))
@@ -198,8 +199,7 @@ environment_register(environment_t * self, string_t name, schemeObject_t * val)
 	hashItem_t * hi;
 	bool ret = hashtable_get(&(self->env), (void **)&hi, &name, (int32_t(*)(void *))hashing, (bool (*)(void *, void *))comp);
 	if (ret) {
-		if(hi->value != SCHEME_OBJECT_NILL)
-			CHKERROR(gc_deref_schemeObject(hi->value))
+		CHKERROR(gc_deref_schemeObject(hi->value))
 		memcpy(hi, &newhi, sizeof(hashItem_t));
 		return ERR_SUCCESS;
 	}

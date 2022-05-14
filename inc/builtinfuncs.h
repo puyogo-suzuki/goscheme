@@ -49,9 +49,10 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 	return ERR_SUCCESS; \
 }
 
-// // Special Functions!
+// // Special Format!
 DECL_SCHEMEFUNC(builtin_if);
 DECL_SCHEMEFUNC(builtin_cond);
+DECL_SCHEMEFUNC(builtin_do);
 
 // // Functions
 DECL_SCHEMEFUNC(builtin_cons);

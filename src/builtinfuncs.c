@@ -71,6 +71,75 @@ builtin_cond(machine_t * self, environment_t * env, schemeObject_t * val, evalua
     return ERR_SUCCESS;
 }
 
+gserror_t
+builtin_do(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    schemeObject_t * car = NULL, * cadr = NULL, * cddr = NULL, * cur = NULL, * cadr_res = NULL;
+    bool pred = false;
+    CHKERROR(schemeObject_car(val, &car))   // bindings
+    CHKERROR(schemeObject_cadr(val, &cadr)) // predicate
+    CHKERROR(schemeObject_cddr(val, &cddr)) // body
+    cur = car;
+    if (cur != SCHEME_OBJECT_NILL) {
+        CHKERROR(gc_ref(&(cur->gcInfo)))
+        while (cur != SCHEME_OBJECT_NILL) {
+            schemeObject_t * prev = cur, * b = NULL, * bcar = NULL, * bcaddr = NULL;
+            CHKERROR(schemeObject_car(cur, &b))
+            CHKERROR(schemeObject_car(b, &bcar))
+            if (bcar == SCHEME_OBJECT_NILL || bcar->kind != SCHEME_OBJECT_SYMBOL) {
+                errorOut("ERROR", "do", "Head of bind must be symbol.");
+                return ERR_SUCCESS;
+            }
+            CHKERROR(schemeObject_caddr(b, &bcaddr))
+            CHKERROR(environment_setq2(self, env, env, &(bcar->value.symValue), bcaddr))
+            CHKERROR(gc_deref_schemeObject(b))
+            CHKERROR(gc_deref_schemeObject(bcar))
+            CHKERROR(gc_deref_schemeObject(bcaddr))
+            CHKERROR(schemeObject_cdr(prev, &cur))
+            CHKERROR(gc_deref_schemeObject(prev))
+        }
+    }
+    goto L_PRED;
+L_LOOP:
+    evaluationResult_t res;
+    schemeObject_t * loopres;
+    CHKERROR(machine_begin(self, env, cddr, &res))
+    CHKERROR(machine_makeforce(self, res, &loopres))
+    CHKERROR(gc_deref_schemeObject(loopres))
+
+    cur = car;
+    if (cur != SCHEME_OBJECT_NILL) {
+        CHKERROR(gc_ref(&(cur->gcInfo)))
+        while (cur != SCHEME_OBJECT_NILL) {
+            schemeObject_t * prev = cur, * b = NULL, * bcar = NULL, * bcadr = NULL;
+            CHKERROR(schemeObject_car(cur, &b))
+            CHKERROR(schemeObject_car(b, &bcar))
+            if (bcar == SCHEME_OBJECT_NILL || bcar->kind != SCHEME_OBJECT_SYMBOL) {
+                errorOut("ERROR", "do", "Head of bind must be symbol.");
+                return ERR_SUCCESS;
+            }
+            CHKERROR(schemeObject_cadr(b, &bcadr))
+            CHKERROR(environment_setq2(self, env, env, &(bcar->value.symValue), bcadr))
+            CHKERROR(gc_deref_schemeObject(b))
+            CHKERROR(gc_deref_schemeObject(bcar))
+            CHKERROR(gc_deref_schemeObject(bcadr))
+            CHKERROR(schemeObject_cdr(prev, &cur))
+            CHKERROR(gc_deref_schemeObject(prev))
+        }
+    }
+L_PRED:
+    CHKERROR(machine_evalforce(self, env, cadr, &cadr_res))
+    pred = cadr_res == &predefined_f;
+    CHKERROR(gc_deref_schemeObject(cadr_res))
+    if (pred) goto L_END; else goto L_LOOP;
+L_END:
+    CHKERROR(gc_deref_schemeObject(car))
+    CHKERROR(gc_deref_schemeObject(cadr))
+    CHKERROR(gc_deref_schemeObject(cddr))
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    return ERR_SUCCESS;
+}
+
 TWO_ARGUMENT_FUNC(builtin_cons, "cons", \
     outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
     if (outobj == NULL) return ERR_OUT_OF_MEMORY; \

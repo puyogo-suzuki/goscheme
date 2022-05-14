@@ -90,7 +90,7 @@ c1up
  - [x] if
  - [x] cond
  - [x] begin
- - [ ] do
+ - [x] do
  - [x] number?
  - [x] +
  - [x] -
