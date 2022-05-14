@@ -88,7 +88,7 @@ c1up
  - [x] let* (same as letrec*)
  - [x] letrec
  - [x] if
- - [ ] cond
+ - [x] cond
  - [x] begin
  - [ ] do
  - [x] number?

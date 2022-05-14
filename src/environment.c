@@ -91,6 +91,7 @@ environment_new_global(environment_t * out)
 
 	CHKERROR(addfunc(out, "cons", 4, builtin_cons))
 	CHKERROR(addfunc(out, "if", 2, builtin_if))
+	CHKERROR(addfunc(out, "cond", 4, builtin_cond))
 	CHKERROR(addfunc(out, "begin", 5, machine_begin))
 	CHKERROR(addfunc(out, "lambda", 6, machine_lambda))
 	CHKERROR(addfunc(out, "set!", 4, environment_set_destructive))

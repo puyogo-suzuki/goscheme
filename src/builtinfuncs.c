@@ -9,7 +9,7 @@ gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (schemeObject_length(val) != 3) {
 		errorOut("ERROR", "if", "if requires 3 argument.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
+		return ERR_EVAL_ARGUMENT_MISMATCH;
 	}
 	schemeObject_t * carres = NULL, * arg0 = NULL, * cdr = NULL, * cadr = NULL, * cddr = NULL,  * caddr  = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
@@ -32,6 +32,43 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 
 	CHKERROR(gc_deref_schemeObject(arg0))
 	return ERR_SUCCESS;
+}
+
+gserror_t
+builtin_cond(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    if (schemeObject_length(val) < 1) {
+        errorOut("ERROR", "cond", "cond requires almost 1 expression.");
+        return ERR_EVAL_ARGUMENT_MISMATCH;
+    }
+    schemeObject_t * cur = val;
+    CHKERROR(gc_ref(&(val->gcInfo)))
+    bool isMatch = false;
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    while (cur != SCHEME_OBJECT_NILL) {
+        schemeObject_t * car = NULL, * prev = cur, * caar = NULL, * caar_res = NULL;
+        CHKERROR(schemeObject_car(cur, &car))
+        CHKERROR(schemeObject_car(car, &caar))
+        isMatch = caar->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&(caar->value.symValue), "else", 4);
+        if (!isMatch) {
+            schemeObject_t * caar_res = NULL;
+            CHKERROR(machine_evalforce(self, env, caar, &caar_res))
+            isMatch = caar_res != &predefined_f;
+            CHKERROR(gc_deref_schemeObject(caar_res))
+        }
+        CHKERROR(gc_deref_schemeObject(caar))
+        if (isMatch) {
+            schemeObject_t * cdar = NULL;
+            CHKERROR(schemeObject_cdr(car, &cdar))
+            CHKERROR(machine_begin(self, env, cdar, out))
+            CHKERROR(gc_deref_schemeObject(cdar))
+            cur = SCHEME_OBJECT_NILL;
+        } else
+            CHKERROR(schemeObject_cdr(prev, &cur))
+        CHKERROR(gc_deref_schemeObject(car))
+        CHKERROR(gc_deref_schemeObject(prev))
+    }
+    return ERR_SUCCESS;
 }
 
 TWO_ARGUMENT_FUNC(builtin_cons, "cons", \

@@ -51,7 +51,7 @@ funcname(machine_t * self, environment_t * env, schemeObject_t * val, evaluation
 
 // // Special Functions!
 DECL_SCHEMEFUNC(builtin_if);
-// DECL_SCHEMEFUNC(buildin_cond);
+DECL_SCHEMEFUNC(builtin_cond);
 
 // // Functions
 DECL_SCHEMEFUNC(builtin_cons);
@@ -82,21 +82,21 @@ DECL_SCHEMEFUNC(builtin_listp);
 DECL_SCHEMEFUNC(builtin_symbolp);
 DECL_SCHEMEFUNC(builtin_list);
 DECL_SCHEMEFUNC(builtin_length);
- DECL_SCHEMEFUNC(builtin_memq);
- DECL_SCHEMEFUNC(builtin_last);
- DECL_SCHEMEFUNC(builtin_append);
- DECL_SCHEMEFUNC(builtin_set_car);
- DECL_SCHEMEFUNC(builtin_set_cdr);
+DECL_SCHEMEFUNC(builtin_memq);
+DECL_SCHEMEFUNC(builtin_last);
+DECL_SCHEMEFUNC(builtin_append);
+DECL_SCHEMEFUNC(builtin_set_car);
+DECL_SCHEMEFUNC(builtin_set_cdr);
 DECL_SCHEMEFUNC(builtin_booleanp);
 DECL_SCHEMEFUNC(builtin_not);
 DECL_SCHEMEFUNC(builtin_stringp);
 DECL_SCHEMEFUNC(builtin_string_append);
- DECL_SCHEMEFUNC(builtin_symbol_string);
- DECL_SCHEMEFUNC(builtin_string_symbol);
- DECL_SCHEMEFUNC(builtin_string_number);
- DECL_SCHEMEFUNC(builtin_number_string);
+DECL_SCHEMEFUNC(builtin_symbol_string);
+DECL_SCHEMEFUNC(builtin_string_symbol);
+DECL_SCHEMEFUNC(builtin_string_number);
+DECL_SCHEMEFUNC(builtin_number_string);
 DECL_SCHEMEFUNC(builtin_procedurep);
- DECL_SCHEMEFUNC(builtin_eqp);
- DECL_SCHEMEFUNC(builtin_neqp);
- DECL_SCHEMEFUNC(builtin_equalp);
+DECL_SCHEMEFUNC(builtin_eqp);
+DECL_SCHEMEFUNC(builtin_neqp);
+DECL_SCHEMEFUNC(builtin_equalp);
 
