@@ -252,6 +252,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     READ_HEAD(self, env, car, carres, cdr) \
     if(carres->kind != SCHEME_OBJECT_NUMBER) goto L_NOT_COMING_NUMBER; \
     init2 \
+    CHKERROR(gc_deref_schemeObject(carres)) \
     while(cdr != SCHEME_OBJECT_NILL) { \
         READ_HEAD(self, env, car, carres, cdr) \
         if(carres->kind != SCHEME_OBJECT_NUMBER) goto L_NOT_COMING_NUMBER; \
