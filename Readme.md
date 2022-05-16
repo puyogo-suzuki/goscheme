@@ -71,7 +71,7 @@ c1up
 # Supported Features
  - [x] Garbage Collection(Reference Counting)
  - [x] Tail Call Optimizatioon
- - [ ] macro?
+ - [x] macro - Not tested well.
  - [ ] Rational Number?
  ---
  - [x] quote

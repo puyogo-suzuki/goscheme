@@ -79,6 +79,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "letrec*", 7, environment_letaster))
 	CHKERROR(addfunc(out, "letrec", 6, environment_let))
 	CHKERROR(addfunc(out, "define", 6, environment_setq))
+	CHKERROR(addfunc(out, "define-macro", 12, environment_define_macro))
 	CHKERROR(addfunc(out, "quote", 5, schemeObject_quote))
 	CHKERROR(addfunc(out, "car", 3, builtin_car))
 	CHKERROR(addfunc(out, "cdr", 3, builtin_cdr))
@@ -390,4 +391,50 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 	out->kind = EVALUATIONRESULT_EVALUATED;
 	out->value.evaluatedValue = car;
 	return ret;
+}
+
+gserror_t
+environment_define_macro(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * caar = NULL, * cdar = NULL;
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	if (schemeObject_length(val) < 2) {
+		errorOut("ERROR", "define-macro", "requires at least 2-length list.");
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_car(val, &car))
+	if (car->kind != SCHEME_OBJECT_CONS) {
+		errorOut("ERROR", "define", "1st argument must be symbol or list.");
+		CHKERROR(gc_deref_schemeObject(car))
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_car(car, &caar))
+	CHKERROR(gc_deref_schemeObject(car))
+	if (caar->kind != SCHEME_OBJECT_SYMBOL) {
+		errorOut("ERROR", "define", "(car (1st argument)) must be symbol.");
+		CHKERROR(gc_deref_schemeObject(caar))
+		CHKERROR(gc_deref_schemeObject(val))
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(schemeObject_cdr(car, &cdar))
+	CHKERROR(schemeObject_cdr(val, &cdr))
+	schemeObject_t * macroObj = NULL;
+	{
+		schemeObject_t * tmp = NULL;
+		tmp = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+		if (tmp == NULL) return ERR_OUT_OF_MEMORY;
+		CHKERROR(schemeObject_new_cons(tmp, cdar, cdr))
+		CHKERROR(gc_ref(&(tmp->gcInfo)))
+		CHKERROR(machine_macro(self, env, tmp, &macroObj))
+		CHKERROR(gc_deref_schemeObject(tmp))
+	}
+	CHKERROR(environment_setq2(self, env, env, &caar->value.strValue, macroObj));
+	CHKERROR(gc_deref_schemeObject(macroObj))
+	//CHKERROR(gc_deref_schemeObject(cdar))  // <- schemeObject_new_cons doesn't ref count up.
+	//CHKERROR(gc_deref_schemeObject(cdr))   // <- schemeObject_new_cons doesn't ref count up.
+	CHKERROR(gc_deref_schemeObject(val))
+	out->kind = EVALUATIONRESULT_EVALUATED;
+	out->value.evaluatedValue = caar;
+	return ERR_SUCCESS;
 }

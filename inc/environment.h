@@ -37,3 +37,4 @@ DECL_SCHEMEFUNC(environment_let);
 DECL_SCHEMEFUNC(environment_letaster);
 DECL_SCHEMEFUNC(environment_setq);
 DECL_SCHEMEFUNC(environment_set_destructive);
+DECL_SCHEMEFUNC(environment_define_macro);
