@@ -103,9 +103,16 @@ linkedListAppend_init(linkedListAppend_t * out, linkedList_t * current) {
 		out->tailnext = &((*out->tailnext)->next);
 }
 
-void
+gserror_t
 linkedListAppend_append(linkedListAppend_t * self, void * value, size_t size) {
 	linkedList_t ** ne = self->tailnext;
-	linkedList_new3(ne, value, size);
+	CHKERROR(linkedList_new3(ne, value, size))
 	self->tailnext = &((*ne)->next);
+	return ERR_SUCCESS;
+}
+
+bool
+linkedListAppend_pop(linkedListAppend_t * self, void * storage, size_t size) {
+	if (self->tailnext == &self->head->next) self->tailnext = &self->head;
+	return linkedList_pop(&(self->head), storage, size);
 }

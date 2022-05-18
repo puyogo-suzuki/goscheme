@@ -139,7 +139,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addsymbol(out, "#t", 2,  &predefined_t))
 
 
-	#if _ESP
+#if _ESP
 	CHKERROR(addfunc(out, "lcd-drawpixel", 13, schemefunc_esp_lcdDrawPixel))
 	CHKERROR(addfunc(out, "lcd-drawline", 12, schemefunc_esp_lcdDrawLine))
 	CHKERROR(addfunc(out, "lcd-fillrect", 12, schemefunc_esp_lcdFillRect))
@@ -154,7 +154,11 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "buttonA-press?", 14, schemefunc_esp_buttonAPressp))
 	CHKERROR(addfunc(out, "buttonB-press?", 14, schemefunc_esp_buttonBPressp))
 	CHKERROR(addfunc(out, "buttonC-press?", 14, schemefunc_esp_buttonCPressp))
-	#endif
+#else
+	CHKERROR(addfunc(out, "sleep", 5, builtin_sleep))
+	CHKERROR(addfunc(out, "display", 7, builtin_display))
+	CHKERROR(addfunc(out, "spawn", 5, builtin_spawn))
+#endif
 	return ERR_SUCCESS;
 }
 

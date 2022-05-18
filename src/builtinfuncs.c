@@ -4,6 +4,8 @@
 #include "machine.h"
 #include "common.h"
 #include "schemeObject_predefined_object.h"
+#include "io.h"
+#include "greenthread.h"
 
 gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
@@ -491,3 +493,37 @@ TWO_ARGUMENT_FUNC(builtin_equalp, "equal?", \
     outobj = schemeObject_equalp(arg0, arg1) ? &predefined_t : &predefined_f; \
     CHKERROR(gc_ref(&(outobj->gcInfo))) \
 , true)
+
+ONE_ARGUMENT_FUNC(builtin_display, "display", { \
+    if (arg0 != SCHEME_OBJECT_NILL && arg0->kind != SCHEME_OBJECT_STRING) { \
+        errorOut("ERROR", "display", "proper string."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    string_write(stdout, &(arg0->value.strValue)); \
+})
+
+ONE_ARGUMENT_FUNC(builtin_sleep, "sleep", { \
+    if (arg0 != SCHEME_OBJECT_NILL && arg0->kind != SCHEME_OBJECT_NUMBER) { \
+        errorOut("ERROR", "sleep", "proper number."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    CHKERROR(greenthread_sleep(self, arg0->value.numValue))\
+})
+
+#if _MSC_VER
+
+gserror_t
+builtin_spawn(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    if (!schemeObject_isList(val)) {
+        errorOut("ERROR", "spawn", "invalid form.");
+        return ERR_EVAL_INVALID_OBJECT_TYPE;
+    }
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    CHKERROR(greenthread_spawn(self, val))
+    return ERR_SUCCESS;
+}
+
+#endif

@@ -155,6 +155,7 @@
     <ClCompile Include="src\builtinfuncs.c" />
     <ClCompile Include="src\environment.c" />
     <ClCompile Include="src\error.c" />
+    <ClCompile Include="src\greenthread.c" />
     <ClCompile Include="src\hashtable.c" />
     <ClCompile Include="src\io.c" />
     <ClCompile Include="src\machine.c" />
@@ -172,6 +173,7 @@
     <ClInclude Include="inc\builtinfuncs.h" />
     <ClInclude Include="inc\environment.h" />
     <ClInclude Include="inc\error.h" />
+    <ClInclude Include="inc\greenthread.h" />
     <ClInclude Include="inc\hashtable.h" />
     <ClInclude Include="inc\io.h" />
     <ClInclude Include="inc\list.h" />

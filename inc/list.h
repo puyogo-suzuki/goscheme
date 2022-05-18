@@ -24,6 +24,7 @@ typedef struct linkedListAppend {
 #define linkedList_get2(self, type) (type*)linkedList_get(self);
 #define linkedList_pop2(self, storage, type) linkedList_pop(self, storage, sizeof(type))
 #define linkedListAppend_append2(self, value, type) linkedListAppend_append(self, value, sizeof(type))
+#define linkedListAppend_pop2(self, storage, type) linkedListAppend_pop(self, storage, sizeof(type))
 gserror_t
 linkedList_new(linkedList_t ** out, size_t size);
 gserror_t
@@ -45,5 +46,7 @@ linkedList_search(linkedList_t * self, void ** outValue, void * searchValue, boo
 
 void
 linkedListAppend_init(linkedListAppend_t * out, linkedList_t * current);
-void
+gserror_t
 linkedListAppend_append(linkedListAppend_t * self, void * value, size_t size);
+bool
+linkedListAppend_pop(linkedListAppend_t * self, void * storage, size_t size);

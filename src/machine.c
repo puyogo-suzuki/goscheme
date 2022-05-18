@@ -5,9 +5,15 @@
 #include "common.h"
 
 gserror_t
-machine_new(machine_t * out)
+machine_new(machine_t * out, environment_t * env)
 {
-	environment_new_global(&(out->env));
+	if (env == NULL) {
+		env = (environment_t *)reallocarray(NULL, 1, sizeof(environment_t));
+		if (env == NULL) return ERR_OUT_OF_MEMORY;
+		environment_new_global(env);
+	}
+	out->env = env;
+	out->runner = NULL;
 	return ERR_SUCCESS;
 }
 

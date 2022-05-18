@@ -100,4 +100,8 @@ DECL_SCHEMEFUNC(builtin_procedurep);
 DECL_SCHEMEFUNC(builtin_eqp);
 DECL_SCHEMEFUNC(builtin_neqp);
 DECL_SCHEMEFUNC(builtin_equalp);
-
+DECL_SCHEMEFUNC(builtin_display);
+#if !defined(_ESP)
+DECL_SCHEMEFUNC(builtin_sleep);
+DECL_SCHEMEFUNC(builtin_spawn);
+#endif

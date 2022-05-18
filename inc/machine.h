@@ -1,8 +1,14 @@
 #pragma once
 #include "environment.h"
+#include "greenthread.h"
+#include <windows.h>
 
 typedef struct machine {
-	environment_t env;
+	environment_t * env;
+	runner_t * runner;
+#if _MSC_VER
+	LPVOID * fiber;
+#endif
 } machine_t;
 
 typedef struct evaluationResult{
@@ -17,7 +23,7 @@ typedef struct evaluationResult{
 } evaluationResult_t;
 
 gserror_t
-machine_new(machine_t * out);
+machine_new(machine_t * out, environment_t * env);
 
 gserror_t
 machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t ** out);
