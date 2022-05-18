@@ -91,6 +91,26 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
 
 ARITHMETIC_LEAST0_FUNC(builtin_additive, "+", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval += carres->value.numValue;)
 ARITHMETIC_LEAST0_FUNC(builtin_multiplication, "*", int32_t retval = 1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval *= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_bitwise_and, "bitwise-and", int32_t retval = -1; , CHKERROR(schemeObject_new_number(outobj, retval)), retval &= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_bitwise_ior, "bitwise-ior", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval |= carres->value.numValue;)
+ARITHMETIC_LEAST0_FUNC(builtin_bitwise_xor, "bitwise-xor", int32_t retval = 0; , CHKERROR(schemeObject_new_number(outobj, retval)), retval ^= carres->value.numValue;)
+ONE_ARGUMENT_FUNC(builtin_bitwise_not, "bitwise-not", { \
+    if (arg0 != SCHEME_OBJECT_NILL && arg0->kind != SCHEME_OBJECT_NUMBER) { \
+        errorOut("ERROR", "bitwise-not", "proper number."); \
+        CHKERROR(gc_deref_schemeObject(arg0)) \
+        return ERR_EVAL_INVALID_OBJECT_TYPE; \
+    }\
+    outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)); \
+    if (outobj == NULL) return ERR_OUT_OF_MEMORY; \
+    CHKERROR(schemeObject_new_number(outobj, ~arg0->value.numValue))\
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+})
+
+TWO_ARGUMENT_FUNC(builtin_shift_right, "shift-right", \
+    outobj = schemeObject_equalp(arg0, arg1) ? &predefined_t : &predefined_f; \
+    CHKERROR(gc_ref(&(outobj->gcInfo))) \
+, true)
+
 
 #define BOOLEAN_LEAST0_FUNC(name, name_str, retval_init, retval_final, updater) gserror_t \
 name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) { \
@@ -112,7 +132,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     out->kind = EVALUATIONRESULT_EVALUATED; \
     out->value.evaluatedValue = outobj; \
     return ERR_SUCCESS; \
-} \
+}
 
 BOOLEAN_LEAST0_FUNC(builtin_and, "and", bool retval = true; schemeObject_t * lastValue = &predefined_t; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue)); , retval &= (carres != &predefined_f); CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))))
 BOOLEAN_LEAST0_FUNC(builtin_or, "or", bool retval = true; schemeObject_t * lastValue = &predefined_f; CHKERROR(gc_ref(&(lastValue->gcInfo))), outobj = retval ? lastValue : &predefined_f; CHKERROR(gc_deref_schemeObject(lastValue));, retval |= (carres != &predefined_f); if (carres != &predefined_f) { CHKERROR(gc_deref_schemeObject(lastValue)); lastValue = carres; CHKERROR(gc_ref(&(lastValue->gcInfo))) })
