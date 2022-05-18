@@ -46,7 +46,7 @@ builtin_cond(machine_t * self, environment_t * env, schemeObject_t * val, evalua
     out->kind = EVALUATIONRESULT_EVALUATED;
     out->value.evaluatedValue = SCHEME_OBJECT_NILL;
     while (cur != SCHEME_OBJECT_NILL) {
-        schemeObject_t * car = NULL, * prev = cur, * caar = NULL, * caar_res = NULL;
+        schemeObject_t * car = NULL, * prev = cur, * caar = NULL;
         CHKERROR(schemeObject_car(cur, &car))
         CHKERROR(schemeObject_car(car, &caar))
         isMatch = caar->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&(caar->value.symValue), "else", 4);
@@ -99,7 +99,7 @@ builtin_do(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
         }
     }
     goto L_PRED;
-L_LOOP:
+L_LOOP: {
     evaluationResult_t res;
     schemeObject_t * loopres;
     CHKERROR(machine_begin(self, env, cddr, &res))
@@ -126,6 +126,7 @@ L_LOOP:
             CHKERROR(gc_deref_schemeObject(prev))
         }
     }
+}
 L_PRED:
     CHKERROR(machine_evalforce(self, env, cadr, &cadr_res))
     pred = cadr_res == &predefined_f;

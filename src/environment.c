@@ -403,7 +403,7 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 
 gserror_t
 environment_define_macro(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * caar = NULL, * cdar = NULL;
+	schemeObject_t * car = NULL, * cdr = NULL, * caar = NULL, * cdar = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	if (schemeObject_length(val) < 2) {
 		errorOut("ERROR", "define-macro", "requires at least 2-length list.");
