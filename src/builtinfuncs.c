@@ -9,7 +9,7 @@ gserror_t
 builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
 	if (schemeObject_length(val) != 3) {
 		errorOut("ERROR", "if", "if requires 3 argument.");
-		return ERR_EVAL_INVALID_OBJECT_TYPE;
+		return ERR_EVAL_ARGUMENT_MISMATCH;
 	}
 	schemeObject_t * carres = NULL, * arg0 = NULL, * cdr = NULL, * cadr = NULL, * cddr = NULL,  * caddr  = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
@@ -32,6 +32,112 @@ builtin_if(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 
 	CHKERROR(gc_deref_schemeObject(arg0))
 	return ERR_SUCCESS;
+}
+
+gserror_t
+builtin_cond(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    if (schemeObject_length(val) < 1) {
+        errorOut("ERROR", "cond", "cond requires almost 1 expression.");
+        return ERR_EVAL_ARGUMENT_MISMATCH;
+    }
+    schemeObject_t * cur = val;
+    CHKERROR(gc_ref(&(val->gcInfo)))
+    bool isMatch = false;
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    while (cur != SCHEME_OBJECT_NILL) {
+        schemeObject_t * car = NULL, * prev = cur, * caar = NULL, * caar_res = NULL;
+        CHKERROR(schemeObject_car(cur, &car))
+        CHKERROR(schemeObject_car(car, &caar))
+        isMatch = caar->kind == SCHEME_OBJECT_SYMBOL && string_equals2(&(caar->value.symValue), "else", 4);
+        if (!isMatch) {
+            schemeObject_t * caar_res = NULL;
+            CHKERROR(machine_evalforce(self, env, caar, &caar_res))
+            isMatch = caar_res != &predefined_f;
+            CHKERROR(gc_deref_schemeObject(caar_res))
+        }
+        CHKERROR(gc_deref_schemeObject(caar))
+        if (isMatch) {
+            schemeObject_t * cdar = NULL;
+            CHKERROR(schemeObject_cdr(car, &cdar))
+            CHKERROR(machine_begin(self, env, cdar, out))
+            CHKERROR(gc_deref_schemeObject(cdar))
+            cur = SCHEME_OBJECT_NILL;
+        } else
+            CHKERROR(schemeObject_cdr(prev, &cur))
+        CHKERROR(gc_deref_schemeObject(car))
+        CHKERROR(gc_deref_schemeObject(prev))
+    }
+    return ERR_SUCCESS;
+}
+
+gserror_t
+builtin_do(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    schemeObject_t * car = NULL, * cadr = NULL, * cddr = NULL, * cur = NULL, * cadr_res = NULL;
+    bool pred = false;
+    CHKERROR(schemeObject_car(val, &car))   // bindings
+    CHKERROR(schemeObject_cadr(val, &cadr)) // predicate
+    CHKERROR(schemeObject_cddr(val, &cddr)) // body
+    cur = car;
+    if (cur != SCHEME_OBJECT_NILL) {
+        CHKERROR(gc_ref(&(cur->gcInfo)))
+        while (cur != SCHEME_OBJECT_NILL) {
+            schemeObject_t * prev = cur, * b = NULL, * bcar = NULL, * bcaddr = NULL;
+            CHKERROR(schemeObject_car(cur, &b))
+            CHKERROR(schemeObject_car(b, &bcar))
+            if (bcar == SCHEME_OBJECT_NILL || bcar->kind != SCHEME_OBJECT_SYMBOL) {
+                errorOut("ERROR", "do", "Head of bind must be symbol.");
+                return ERR_SUCCESS;
+            }
+            CHKERROR(schemeObject_caddr(b, &bcaddr))
+            CHKERROR(environment_setq2(self, env, env, &(bcar->value.symValue), bcaddr))
+            CHKERROR(gc_deref_schemeObject(b))
+            CHKERROR(gc_deref_schemeObject(bcar))
+            CHKERROR(gc_deref_schemeObject(bcaddr))
+            CHKERROR(schemeObject_cdr(prev, &cur))
+            CHKERROR(gc_deref_schemeObject(prev))
+        }
+    }
+    goto L_PRED;
+L_LOOP:
+    evaluationResult_t res;
+    schemeObject_t * loopres;
+    CHKERROR(machine_begin(self, env, cddr, &res))
+    CHKERROR(machine_makeforce(self, res, &loopres))
+    CHKERROR(gc_deref_schemeObject(loopres))
+
+    cur = car;
+    if (cur != SCHEME_OBJECT_NILL) {
+        CHKERROR(gc_ref(&(cur->gcInfo)))
+        while (cur != SCHEME_OBJECT_NILL) {
+            schemeObject_t * prev = cur, * b = NULL, * bcar = NULL, * bcadr = NULL;
+            CHKERROR(schemeObject_car(cur, &b))
+            CHKERROR(schemeObject_car(b, &bcar))
+            if (bcar == SCHEME_OBJECT_NILL || bcar->kind != SCHEME_OBJECT_SYMBOL) {
+                errorOut("ERROR", "do", "Head of bind must be symbol.");
+                return ERR_SUCCESS;
+            }
+            CHKERROR(schemeObject_cadr(b, &bcadr))
+            CHKERROR(environment_setq2(self, env, env, &(bcar->value.symValue), bcadr))
+            CHKERROR(gc_deref_schemeObject(b))
+            CHKERROR(gc_deref_schemeObject(bcar))
+            CHKERROR(gc_deref_schemeObject(bcadr))
+            CHKERROR(schemeObject_cdr(prev, &cur))
+            CHKERROR(gc_deref_schemeObject(prev))
+        }
+    }
+L_PRED:
+    CHKERROR(machine_evalforce(self, env, cadr, &cadr_res))
+    pred = cadr_res == &predefined_f;
+    CHKERROR(gc_deref_schemeObject(cadr_res))
+    if (pred) goto L_END; else goto L_LOOP;
+L_END:
+    CHKERROR(gc_deref_schemeObject(car))
+    CHKERROR(gc_deref_schemeObject(cadr))
+    CHKERROR(gc_deref_schemeObject(cddr))
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    return ERR_SUCCESS;
 }
 
 TWO_ARGUMENT_FUNC(builtin_cons, "cons", \
@@ -166,6 +272,7 @@ name(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResu
     READ_HEAD(self, env, car, carres, cdr) \
     if(carres->kind != SCHEME_OBJECT_NUMBER) goto L_NOT_COMING_NUMBER; \
     init2 \
+    CHKERROR(gc_deref_schemeObject(carres)) \
     while(cdr != SCHEME_OBJECT_NILL) { \
         READ_HEAD(self, env, car, carres, cdr) \
         if(carres->kind != SCHEME_OBJECT_NUMBER) goto L_NOT_COMING_NUMBER; \

@@ -49,6 +49,9 @@ gc_deref_schemeObject(struct schemeObject * self) {
                         gc_deref_environment(me->value.procedureValue.environment);
                     current = me->value.procedureValue.body;
                     break;
+                case SCHEME_OBJECT_MACRO:
+                    current = me->value.macroValue.body;
+                    break;
             }
             free(me);
         }

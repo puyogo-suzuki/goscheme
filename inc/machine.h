@@ -26,3 +26,4 @@ DECL_SCHEMEFUNC(machine_begin);
 DECL_SCHEMEFUNC_FORCE(machine_evalforce);
 DECL_SCHEMEFUNC(machine_eval);
 DECL_SCHEMEFUNC(machine_lambda);
+DECL_SCHEMEFUNC_FORCE(machine_macro);

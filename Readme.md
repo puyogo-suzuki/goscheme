@@ -71,7 +71,7 @@ c1up
 # Supported Features
  - [x] Garbage Collection(Reference Counting)
  - [x] Tail Call Optimizatioon
- - [ ] macro?
+ - [x] macro - Not tested well.
  - [ ] Rational Number?
  ---
  - [x] quote
@@ -88,9 +88,9 @@ c1up
  - [x] let* (same as letrec*)
  - [x] letrec
  - [x] if
- - [ ] cond
+ - [x] cond
  - [x] begin
- - [ ] do
+ - [x] do
  - [x] number?
  - [x] +
  - [x] -

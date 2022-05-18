@@ -22,7 +22,8 @@ typedef enum schemeObject_kind {
 	SCHEME_OBJECT_NUMBER,
 	SCHEME_OBJECT_CONS,
 	SCHEME_OBJECT_EXTERN_FUNCTION,
-	SCHEME_OBJECT_PROCEDURE
+	SCHEME_OBJECT_PROCEDURE,
+	SCHEME_OBJECT_MACRO
 } schemeObject_kind_t;
 
 typedef struct schemeObject {
@@ -44,6 +45,10 @@ typedef struct schemeObject {
 			struct environment * environment;
 			struct schemeObject * body;
 		} procedureValue;
+		struct {
+			struct environment * environment;
+			struct schemeObject * body;
+		} macroValue;
 	} value;
 } schemeObject_t;
 
@@ -61,6 +66,8 @@ gserror_t
 schemeObject_new_extFunc(schemeObject_t * out, struct environment * environment, schemeFunction_t * func);
 gserror_t
 schemeObject_new_procedure(schemeObject_t * out, struct environment * environment, schemeObject_t * body);
+gserror_t
+schemeObject_new_macro(schemeObject_t * out, struct environment * environment, schemeObject_t * body);
 
 gserror_t
 schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj);

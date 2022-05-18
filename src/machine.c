@@ -84,6 +84,14 @@ machine_lambdaexec(machine_t * self, environment_t * env, evaluationResult_t * o
 }
 
 gserror_t
+machine_macroexec(machine_t * self, environment_t * env, schemeObject_t ** out, schemeObject_t * body, schemeObject_t * arg) {
+	evaluationResult_t res;
+	CHKERROR(machine_lambdaexec(self, env, &res, body, arg))
+	CHKERROR(machine_makeforce(self, res, out))
+	return ERR_SUCCESS;
+}
+
+gserror_t
 machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t ** out)
 {
 	evaluationResult_t ret = inresult, ret_prev = inresult;
@@ -146,6 +154,13 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evalua
 				CHKERROR(schemeObject_map(self, env, &evaluatedArg, cdr, machine_eval))
 				out->value.tailcallValue.arguments = evaluatedArg;
 				break;
+			case SCHEME_OBJECT_MACRO:
+				schemeObject_t * macroOut = NULL;
+				CHKERROR(machine_macroexec(self, env, &macroOut, func->value.macroValue.body, cdr))
+				CHKERROR(gc_deref_schemeObject(func))
+				CHKERROR(machine_eval(self, env, macroOut, out))
+				CHKERROR(gc_deref_schemeObject(macroOut))
+				break;
 			default: {
 				string_t errstr;
 				fprintf(stderr, "[ERROR] machine_eval: Not function: ");
@@ -182,5 +197,22 @@ machine_lambda(machine_t * self, environment_t * env, schemeObject_t * val, eval
 	CHKERROR(gc_ref(&(outobj->gcInfo)))
 	out->kind = EVALUATIONRESULT_EVALUATED;
 	out->value.evaluatedValue = outobj;
+	return ERR_SUCCESS;
+}
+
+gserror_t
+machine_macro(machine_t * self, environment_t * env, schemeObject_t * val, schemeObject_t ** out) {
+	schemeObject_t * outobj = NULL;
+	if(!schemeObject_isList(val)) {
+		errorOut("ERROR", "macro", "argument must be list.");
+		return ERR_EVAL_INVALID_OBJECT_TYPE;
+	}
+	CHKERROR(gc_ref(&(val->gcInfo)))
+	outobj = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+	if(outobj == NULL) return ERR_OUT_OF_MEMORY;
+	CHKERROR(gc_ref(&(env->gcInfo)))
+	CHKERROR(schemeObject_new_macro(outobj, env, val))
+	CHKERROR(gc_ref(&(outobj->gcInfo)))
+	*out = outobj;
 	return ERR_SUCCESS;
 }

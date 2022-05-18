@@ -56,6 +56,15 @@ schemeObject_new_procedure(schemeObject_t * out, struct environment * environmen
 }
 
 gserror_t
+schemeObject_new_macro(schemeObject_t * out, struct environment * environment, schemeObject_t * body) {
+	out->kind = SCHEME_OBJECT_MACRO;
+	out->value.macroValue.environment = environment;
+	out->value.macroValue.body = body;
+	gcInfo_new(&out->gcInfo);
+	return ERR_SUCCESS;
+}
+
+gserror_t
 schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj) {
 	if(inobj == SCHEME_OBJECT_NILL) {
 		*out = SCHEME_OBJECT_NILL;
@@ -85,6 +94,10 @@ schemeObject_copy_onedepth(schemeObject_t ** out, schemeObject_t * inobj) {
 			break;
 		case SCHEME_OBJECT_STRING:
 			string_copy(&((*out)->value.strValue), &inobj->value.strValue);
+			break;
+		case SCHEME_OBJECT_MACRO:
+			if (inobj->value.procedureValue.body != SCHEME_OBJECT_NILL)
+				gc_ref(&(inobj->value.procedureValue.body->gcInfo));
 			break;
 	}
 	return ERR_SUCCESS;
@@ -241,6 +254,8 @@ schemeObject_eqp(schemeObject_t * lhs, schemeObject_t * rhs) {
 		return lhs->value.strValue.buffer == rhs->value.strValue.buffer;
 	case SCHEME_OBJECT_SYMBOL:
 		return lhs->value.symValue.buffer == rhs->value.symValue.buffer;
+	case SCHEME_OBJECT_MACRO:
+		return lhs->value.macroValue.body == rhs->value.macroValue.body;
 	}
 	return false;
 }
@@ -251,7 +266,7 @@ schemeObject_equalp(schemeObject_t * lhs, schemeObject_t * rhs) {
 	if(lhs == SCHEME_OBJECT_NILL || rhs == SCHEME_OBJECT_NILL) return false;
 	if(lhs->kind != rhs->kind) return false;
 	switch (lhs->kind) {
-	case SCHEME_OBJECT_EXTERN_FUNCTION: case SCHEME_OBJECT_NUMBER: case SCHEME_OBJECT_PROCEDURE:
+	case SCHEME_OBJECT_EXTERN_FUNCTION: case SCHEME_OBJECT_NUMBER: case SCHEME_OBJECT_PROCEDURE: case SCHEME_OBJECT_MACRO:
 		return schemeObject_eqp(lhs, rhs);
 	case SCHEME_OBJECT_CONS:
 		return schemeObject_equalp(lhs->value.consValue.value, rhs->value.consValue.value)
@@ -371,6 +386,9 @@ schemeObject_toString(string_t * out, schemeObject_t * inobj) {
 					goto CONTINUE_OUTER_WHILE;
 				case SCHEME_OBJECT_PROCEDURE:
 					CHKERROR(stringBuilder_append(&sb, "<PROCEDURE>", 11))
+					goto CONTINUE_OUTER_WHILE;
+				case SCHEME_OBJECT_MACRO:
+					CHKERROR(stringBuilder_append(&sb, "<MACRO>", 7))
 					goto CONTINUE_OUTER_WHILE;
 			}
 		}
