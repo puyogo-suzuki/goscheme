@@ -5,6 +5,7 @@
 #if __cplusplus
 extern "C" {
 #endif
+extern VL53L0X tofSensor;
 void
 serialOut(const char * str);
 void
@@ -43,6 +44,12 @@ bool
 buttonBIsPressed(void);
 bool
 buttonCIsPressed(void);
+void
+accelGetAccelData(float * x, float * y, float * z);
+void
+gyroGetGyroData(float * x, float * y, float *z);
+void
+gyroGetTempData(float * t);
 #if __cplusplus
 }
 #endif

@@ -162,6 +162,9 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "buttonA-press?", 14, schemefunc_esp_buttonAPressp))
 	CHKERROR(addfunc(out, "buttonB-press?", 14, schemefunc_esp_buttonBPressp))
 	CHKERROR(addfunc(out, "buttonC-press?", 14, schemefunc_esp_buttonCPressp))
+	CHKERROR(addfunc(out, "m5-accel", 8, schemefunc_esp_accel))
+	CHKERROR(addfunc(out, "m5-gyro", 7, schemefunc_esp_gyro))
+	CHKERROR(addfunc(out, "m5-temp", 7, schemefunc_esp_temp))
 	#endif
 	return ERR_SUCCESS;
 }

@@ -189,4 +189,75 @@ schemefunc_esp_buttonCPressp(machine_t * self, environment_t * env, schemeObject
     CHKERROR(gc_ref(&(out->value.evaluatedValue->gcInfo)))
     return ERR_SUCCESS;
 }
+
+gserror_t
+schemefunc_esp_accel(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    if(val != SCHEME_OBJECT_NILL) {
+        errorOut("ERROR", "M5-accel", "No argument required."); \
+        return ERR_EVAL_ARGUMENT_MISMATCH;
+    }
+    schemeObject_t * outobj1 = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * outobj2 = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+    schemeObject_t * x = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * y = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * z = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+    if(outobj1 == NULL || outobj2 == NULL || x == NULL || y == NULL || z == NULL) return ERR_OUT_OF_MEMORY;
+    float ax, ay, az;
+    accelGetAccelData(&ax, &ay, &az);
+    CHKERROR(schemeObject_new_number(x, (int)(ax * 1024)))
+    CHKERROR(schemeObject_new_number(y, (int)(ay * 1024)))
+    CHKERROR(schemeObject_new_number(z, (int)(az * 1024)))
+    CHKERROR(schemeObject_new_cons(outobj2, y, z))
+    CHKERROR(schemeObject_new_cons(outobj1, x, outobj2))
+    CHKERROR(gc_ref(&(outobj1->gcInfo)))
+    CHKERROR(gc_ref(&(outobj2->gcInfo)))
+    CHKERROR(gc_ref(&(x->gcInfo)))
+    CHKERROR(gc_ref(&(y->gcInfo)))
+    CHKERROR(gc_ref(&(z->gcInfo)))
+    out->value.evaluatedValue = outobj1;
+    return ERR_SUCCESS;
+}
+
+gserror_t
+schemefunc_esp_gyro(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    if(val != SCHEME_OBJECT_NILL) {
+        errorOut("ERROR", "M5-gyro", "No argument required."); \
+        return ERR_EVAL_ARGUMENT_MISMATCH;
+    }
+    schemeObject_t * outobj1 = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * outobj2 = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+    schemeObject_t * x = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * y = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t)), * z = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+    if(outobj1 == NULL || outobj2 == NULL || x == NULL || y == NULL || z == NULL) return ERR_OUT_OF_MEMORY;
+    float gx, gy, gz;
+    gyroGetGyroData(&gx, &gy, &gz);
+    CHKERROR(schemeObject_new_number(x, (int)(gx * 1024)))
+    CHKERROR(schemeObject_new_number(y, (int)(gy * 1024)))
+    CHKERROR(schemeObject_new_number(z, (int)(gz * 1024)))
+    CHKERROR(schemeObject_new_cons(outobj2, y, z))
+    CHKERROR(schemeObject_new_cons(outobj1, x, outobj2))
+    CHKERROR(gc_ref(&(outobj1->gcInfo)))
+    CHKERROR(gc_ref(&(outobj2->gcInfo)))
+    CHKERROR(gc_ref(&(x->gcInfo)))
+    CHKERROR(gc_ref(&(y->gcInfo)))
+    CHKERROR(gc_ref(&(z->gcInfo)))
+    out->value.evaluatedValue = outobj1;
+    return ERR_SUCCESS;
+}
+
+gserror_t
+schemefunc_esp_temp(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
+    out->kind = EVALUATIONRESULT_EVALUATED;
+    out->value.evaluatedValue = SCHEME_OBJECT_NILL;
+    if(val != SCHEME_OBJECT_NILL) {
+        errorOut("ERROR", "M5-temp", "No argument required."); \
+        return ERR_EVAL_ARGUMENT_MISMATCH;
+    }
+    schemeObject_t * t = (schemeObject_t *)reallocarray(NULL, 1, sizeof(schemeObject_t));
+    if(t == NULL) return ERR_OUT_OF_MEMORY;
+    float te;
+    tempGetTempData(&te);
+    CHKERROR(schemeObject_new_number(t, (int)(te * 1024)))
+    out->value.evaluatedValue = t;
+    return ERR_SUCCESS;
+}
 #endif

@@ -17,5 +17,8 @@ DECL_SCHEMEFUNC(schemefunc_esp_M5Update);
 DECL_SCHEMEFUNC(schemefunc_esp_buttonAPressp);
 DECL_SCHEMEFUNC(schemefunc_esp_buttonBPressp);
 DECL_SCHEMEFUNC(schemefunc_esp_buttonCPressp);
+DECL_SCHEMEFUNC(schemefunc_esp_accel);
+DECL_SCHEMEFUNC(schemefunc_esp_gyro);
+DECL_SCHEMEFUNC(schemefunc_esp_temp);
 
 #endif
