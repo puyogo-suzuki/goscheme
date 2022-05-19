@@ -95,7 +95,7 @@ gyroGetGyroData(float * x, float * y, float *z){
     M5.IMU.getGyroData(x, y, z);
 }
 void
-gyroGetTempData(float * t) {
+tempGetTempData(float * t) {
     M5.IMU.getTempData(t);
 }
 }
