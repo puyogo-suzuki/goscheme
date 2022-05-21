@@ -38,8 +38,8 @@ runner_new_spawn(runner_t * outval, scheduler_t * paren, LPTHREAD_START_ROUTINE 
 void
 runner_terminate(runner_t * self) {
 	while (true) {
-		machine_t * getNext = scheduler_getNext(self->parent);
 #if _MSC_VER
+		machine_t * getNext = scheduler_getNext(self->parent);
 		if (getNext == NULL) {
 			Sleep(500);
 			continue;
@@ -53,6 +53,7 @@ runner_terminate(runner_t * self) {
 }
 
 typedef struct starter { machine_t * machine; schemeObject_t * func;  } starter_t;
+#if _MSC_VER
 void
 greenthread_starter(LPVOID arg) {
 	starter_t s = *(starter_t *)arg;
@@ -72,7 +73,6 @@ greenthread_starter(LPVOID arg) {
 	}
 	gc_deref_schemeObject(s.func);
 	machine_t * getNext = scheduler_getNext(s.machine->runner->parent);
-#if _MSC_VER
 	if (getNext == s.machine)
 		runner_terminate(s.machine->runner);
 	else {
@@ -82,10 +82,8 @@ greenthread_starter(LPVOID arg) {
 		SwitchToFiber(getNext->fiber);
 		// this means return;
 	}
-#endif
-
 }
-
+#endif
 gserror_t
 greenthread_init(machine_t * self, schemeObject_t * function, scheduler_t * registerTo) {
 #if _MSC_VER
@@ -116,8 +114,8 @@ greenthread_sleep(machine_t * self, int milliSeconds) {
 gserror_t
 greenthread_yield(struct machine * self) {
 	if (self->runner == NULL) return ERR_SUCCESS; // NOT MULTITHREAD.
-	machine_t * getNext = scheduler_getNext(self->runner->parent);
 #if _MSC_VER
+	machine_t * getNext = scheduler_getNext(self->runner->parent);
 	if (getNext == NULL)
 #if _MSC_VER
 		Sleep(50);

@@ -168,7 +168,9 @@ environment_new_global(environment_t * out)
 #else
 	CHKERROR(addfunc(out, "sleep", 5, builtin_sleep))
 	CHKERROR(addfunc(out, "display", 7, builtin_display))
+#if _MSC_VER
 	CHKERROR(addfunc(out, "spawn", 5, builtin_spawn))
+#endif
 #endif
 	return ERR_SUCCESS;
 }

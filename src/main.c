@@ -79,7 +79,7 @@ int main(void) {
         gserror_t evalerrno = ERR_SUCCESS;
         if (parse(&so, &t)) printf("parse fail\n");
         else {
-            if (evalerrno = machine_evalforce(&vm, &(vm.env), so, &res)) printf("eval fail : %d\n", evalerrno);
+            if (evalerrno = machine_evalforce(&vm, vm.env, so, &res)) printf("eval fail : %d\n", evalerrno);
             else {
                 schemeObject_toString(&str, res);
                 string_writeLine(stdout, &str);
