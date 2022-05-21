@@ -108,6 +108,14 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "<=", 2, builtin_leq))
 	CHKERROR(addfunc(out, ">", 1, builtin_greater))
 	CHKERROR(addfunc(out, ">=", 2, builtin_geq))
+	CHKERROR(addfunc(out, "bitwise-and", 11, builtin_bitwise_and))
+	CHKERROR(addfunc(out, "logand", 6, builtin_bitwise_and))
+	CHKERROR(addfunc(out, "bitwise-ior", 11, builtin_bitwise_ior))
+	CHKERROR(addfunc(out, "logior", 6, builtin_bitwise_ior))
+	CHKERROR(addfunc(out, "bitwise-xor", 11, builtin_bitwise_xor))
+	CHKERROR(addfunc(out, "logxor", 6, builtin_bitwise_xor))
+	CHKERROR(addfunc(out, "bitwise-not", 11, builtin_bitwise_not))
+	CHKERROR(addfunc(out, "lognot", 6, builtin_bitwise_not))
 	CHKERROR(addfunc(out, "not", 3, builtin_not))
 	CHKERROR(addfunc(out, "and", 3, builtin_and))
 	CHKERROR(addfunc(out, "or", 2, builtin_or))
@@ -154,6 +162,9 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "buttonA-press?", 14, schemefunc_esp_buttonAPressp))
 	CHKERROR(addfunc(out, "buttonB-press?", 14, schemefunc_esp_buttonBPressp))
 	CHKERROR(addfunc(out, "buttonC-press?", 14, schemefunc_esp_buttonCPressp))
+	CHKERROR(addfunc(out, "m5-accel", 8, schemefunc_esp_accel))
+	CHKERROR(addfunc(out, "m5-gyro", 7, schemefunc_esp_gyro))
+	CHKERROR(addfunc(out, "m5-temp", 7, schemefunc_esp_temp))
 #else
 	CHKERROR(addfunc(out, "sleep", 5, builtin_sleep))
 	CHKERROR(addfunc(out, "display", 7, builtin_display))
@@ -399,7 +410,7 @@ environment_set_destructive(struct machine * self, environment_t * env, schemeOb
 
 gserror_t
 environment_define_macro(struct machine * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
-	schemeObject_t * car = NULL, * cdr = NULL, * cadr = NULL, * caar = NULL, * cdar = NULL;
+	schemeObject_t * car = NULL, * cdr = NULL, * caar = NULL, * cdar = NULL;
 	CHKERROR(gc_ref(&(val->gcInfo)))
 	if (schemeObject_length(val) < 2) {
 		errorOut("ERROR", "define-macro", "requires at least 2-length list.");

@@ -86,4 +86,16 @@ bool
 buttonCIsPressed(void) {
     return M5.BtnC.isPressed();
 }
+void
+accelGetAccelData(float * x, float * y, float * z){
+    M5.IMU.getAccelData(x, y, z);
+}
+void
+gyroGetGyroData(float * x, float * y, float *z){
+    M5.IMU.getGyroData(x, y, z);
+}
+void
+tempGetTempData(float * t) {
+    M5.IMU.getTempData(t);
+}
 }

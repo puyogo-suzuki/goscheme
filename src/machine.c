@@ -160,13 +160,14 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evalua
 				CHKERROR(schemeObject_map(self, env, &evaluatedArg, cdr, machine_eval))
 				out->value.tailcallValue.arguments = evaluatedArg;
 				break;
-			case SCHEME_OBJECT_MACRO:
+			case SCHEME_OBJECT_MACRO: {
 				schemeObject_t * macroOut = NULL;
 				CHKERROR(machine_macroexec(self, env, &macroOut, func->value.macroValue.body, cdr))
 				CHKERROR(gc_deref_schemeObject(func))
 				CHKERROR(machine_eval(self, env, macroOut, out))
 				CHKERROR(gc_deref_schemeObject(macroOut))
 				break;
+			}
 			default: {
 				string_t errstr;
 				fprintf(stderr, "[ERROR] machine_eval: Not function: ");

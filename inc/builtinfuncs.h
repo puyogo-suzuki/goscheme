@@ -67,6 +67,12 @@ DECL_SCHEMEFUNC(builtin_cddddr);
 
 DECL_SCHEMEFUNC(builtin_and);
 DECL_SCHEMEFUNC(builtin_or);
+DECL_SCHEMEFUNC(builtin_bitwise_and);
+DECL_SCHEMEFUNC(builtin_bitwise_ior);
+DECL_SCHEMEFUNC(builtin_bitwise_xor);
+DECL_SCHEMEFUNC(builtin_bitwise_not);
+DECL_SCHEMEFUNC(builtin_shift_left);
+DECL_SCHEMEFUNC(builtin_shift_right);
 DECL_SCHEMEFUNC(builtin_numberp);
 DECL_SCHEMEFUNC(builtin_additive);
 DECL_SCHEMEFUNC(builtin_subtract);

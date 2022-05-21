@@ -1,7 +1,9 @@
 #pragma once
 #include "environment.h"
 #include "greenthread.h"
+#if _MSC_VER
 #include <windows.h>
+#endif
 
 typedef struct machine {
 	environment_t * env;

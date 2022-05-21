@@ -43,6 +43,12 @@ bool
 buttonBIsPressed(void);
 bool
 buttonCIsPressed(void);
+void
+accelGetAccelData(float * x, float * y, float * z);
+void
+gyroGetGyroData(float * x, float * y, float *z);
+void
+tempGetTempData(float * t);
 #if __cplusplus
 }
 #endif
