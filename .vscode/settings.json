@@ -40,6 +40,11 @@
         "common.h": "c",
         "machine.h": "c",
         "ios": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "sstream": "c",
+        "error.h": "c",
+        "errno.h": "c",
+        "errno-base.h": "c",
+        "deque": "c"
     }
 }

@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "unix",
+            "defines": [
+                "DEBUG",
+                "_SYSV"
+            ],
+            "includePath": ["./inc"]
+        }
+    ],
+    "version": 4
+}

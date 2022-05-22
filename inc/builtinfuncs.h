@@ -109,5 +109,7 @@ DECL_SCHEMEFUNC(builtin_equalp);
 DECL_SCHEMEFUNC(builtin_display);
 #if !defined(_ESP)
 DECL_SCHEMEFUNC(builtin_sleep);
+#if _MSC_VER || _SYSV
 DECL_SCHEMEFUNC(builtin_spawn);
+#endif
 #endif

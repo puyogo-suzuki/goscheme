@@ -4,12 +4,18 @@
 #if _MSC_VER
 #include <windows.h>
 #endif
+#if _SYSV
+#include <ucontext.h>
+#endif
 
 typedef struct machine {
 	environment_t * env;
 	runner_t * runner;
 #if _MSC_VER
 	LPVOID * fiber;
+#endif
+#if _SYSV
+	ucontext_t uc;
 #endif
 } machine_t;
 

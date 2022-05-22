@@ -524,6 +524,7 @@ ONE_ARGUMENT_FUNC(builtin_display, "display", { \
     string_write(stdout, &(arg0->value.strValue)); \
 })
 
+#if !defined(_ESP)
 ONE_ARGUMENT_FUNC(builtin_sleep, "sleep", { \
     if (arg0 != SCHEME_OBJECT_NILL && arg0->kind != SCHEME_OBJECT_NUMBER) { \
         errorOut("ERROR", "sleep", "proper number."); \
@@ -533,8 +534,7 @@ ONE_ARGUMENT_FUNC(builtin_sleep, "sleep", { \
     CHKERROR(greenthread_sleep(self, arg0->value.numValue))\
 })
 
-#if _MSC_VER
-
+#if _MSC_VER || _SYSV
 gserror_t
 builtin_spawn(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
     if (!schemeObject_isList(val)) {
@@ -547,4 +547,5 @@ builtin_spawn(machine_t * self, environment_t * env, schemeObject_t * val, evalu
     return ERR_SUCCESS;
 }
 
+#endif
 #endif

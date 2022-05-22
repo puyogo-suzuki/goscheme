@@ -168,7 +168,7 @@ environment_new_global(environment_t * out)
 #else
 	CHKERROR(addfunc(out, "sleep", 5, builtin_sleep))
 	CHKERROR(addfunc(out, "display", 7, builtin_display))
-#if _MSC_VER
+#if _MSC_VER || _SYSV
 	CHKERROR(addfunc(out, "spawn", 5, builtin_spawn))
 #endif
 #endif

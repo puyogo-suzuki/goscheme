@@ -13,10 +13,8 @@ string_writeLine(FILE * f, string_t * str) {
 #else
 void
 string_write(FILE * f, string_t * str) {
-	char cur;
-	for (int i = 0; string_getAt(str, i, &cur) == ERR_SUCCESS; ++i) {
-		putc(cur, f);
-	}
+	fwrite(str->buffer, 1, string_getLength(str), f);
+	fflush(f);
 }
 
 void
@@ -26,5 +24,6 @@ string_writeLine(FILE * f, string_t * str) {
 	putc('\r', f); // 実は要らん
 #endif
 	putc('\n', f);
+	fflush(f);
 }
 #endif
