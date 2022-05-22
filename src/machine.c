@@ -106,6 +106,7 @@ machine_makeforce(machine_t * self, evaluationResult_t inresult, schemeObject_t 
 		CHKERROR(machine_lambdaexec(self, ret.value.tailcallValue.lambdaValue->value.procedureValue.environment, &ret, ret.value.tailcallValue.lambdaValue->value.procedureValue.body, ret.value.tailcallValue.arguments))
 		CHKERROR(gc_deref_schemeObject(ret_prev.value.tailcallValue.lambdaValue))
 		CHKERROR(gc_deref_schemeObject(ret_prev.value.tailcallValue.arguments))
+		CHKERROR(greenthread_yield(self))
 	}
 	*out = ret.value.evaluatedValue;
 	return ERR_SUCCESS;
