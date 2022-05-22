@@ -104,6 +104,7 @@ builtin_do(machine_t * self, environment_t * env, schemeObject_t * val, evaluati
 L_LOOP: {
     evaluationResult_t res;
     schemeObject_t * loopres;
+    CHKERROR(greenthread_yield(self))
     CHKERROR(machine_begin(self, env, cddr, &res))
     CHKERROR(machine_makeforce(self, res, &loopres))
     CHKERROR(gc_deref_schemeObject(loopres))
