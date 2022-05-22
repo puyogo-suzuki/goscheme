@@ -4,17 +4,17 @@
 #include "parse.h"
 #include "machine.h"
 #include "gc.h"
-#include <errno.h>
 
 #if _MSC_VER || _SYSV
 #if _MSC_VER
-typedef struct repl { HANDLE mutex, mutex1; machine_t * self; schemeObject_t * parsedVal; } repl_t;
+typedef struct repl { HANDLE ev, ev1; machine_t * self; schemeObject_t * parsedVal; } repl_t;
 
 DWORD WINAPI
 repl_thread(repl_t * param) {
 #elif _SYSV
 #include <pthread.h>
-typedef struct repl { pthread_mutex_t mutex, mutex1; machine_t * self; schemeObject_t * parsedVal; } repl_t;
+#include <semaphore.h>
+typedef struct repl { sem_t sem, sem1; machine_t * self; schemeObject_t * parsedVal; } repl_t;
 
 void *
 repl_thread(repl_t * param) {
@@ -29,9 +29,9 @@ repl_thread(repl_t * param) {
         schemeObject_t * res;
         string_t str;
 #if _MSC_VER
-        if (WaitForSingleObject(param->mutex, 0) == WAIT_OBJECT_0) {
+        if (WaitForSingleObject(param->ev, 0) == WAIT_OBJECT_0) {
 #elif _SYSV
-        if (pthread_mutex_trylock(&(param->mutex)) == 0) {
+        if (sem_trywait(&(param->sem)) == 0) {
 #endif
             if (param->parsedVal == NULL) {
                 return 0;
@@ -46,9 +46,9 @@ repl_thread(repl_t * param) {
             gc_deref_schemeObject(param->parsedVal);
             param->parsedVal = NULL;
 #if _MSC_VER
-            SetEvent(param->mutex1);
+            SetEvent(param->ev1);
 #elif _SYSV
-            pthread_mutex_unlock(&(param->mutex1));
+            sem_post(&(param->sem1));
 #endif
         } else
             greenthread_yield(param->self);
@@ -68,13 +68,11 @@ int main(void) {
     param->self = vm;
     param->parsedVal = NULL;
 #if _MSC_VER
-    param->mutex = CreateEvent(0, FALSE, FALSE, NULL);
-    param->mutex1 = CreateEvent(0, FALSE, FALSE, NULL);
-    if (param->mutex == NULL || param->mutex1 == NULL) return 1;
+    param->ev = CreateEvent(0, FALSE, FALSE, NULL);
+    param->ev1 = CreateEvent(0, FALSE, FALSE, NULL);
+    if (param->ev == NULL || param->ev1 == NULL) return 1;
 #elif _SYSV
-    if (pthread_mutex_init(&(param->mutex), NULL) || pthread_mutex_init(&(param->mutex1), NULL)) return 1;
-    pthread_mutex_lock(&(param->mutex));
-    pthread_mutex_lock(&(param->mutex1));
+    if (sem_init(&(param->sem), 0, 0) || sem_init(&(param->sem1), 0, 0)) return 1;
 #endif
     vm->runner = runner;
 #if _MSC_VER
@@ -92,11 +90,11 @@ int main(void) {
         if (parse(&param->parsedVal, &t)) printf("parse fail\n");
         else {
 #if _MSC_VER
-            SetEvent(param->mutex);
-            WaitForSingleObject(param->mutex1, INFINITE);
+            SetEvent(param->ev);
+            WaitForSingleObject(param->ev1, INFINITE);
 #elif _SYSV
-            pthread_mutex_unlock(&(param->mutex));
-            pthread_mutex_lock(&(param->mutex1));
+            sem_post(&(param->sem));
+            sem_wait(&(param->sem1));
 #endif
         }
     }
