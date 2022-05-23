@@ -1,10 +1,14 @@
-CFLAGS=-g -Wall -Werror -Wno-parentheses -pthread -D _SYSV -D DEBUG
+CFLAGS=-g -Wall -Werror -Wno-parentheses -D DEBUG
 INC=./inc
 SRCS=$(wildcard src/*.c)
 SRCS2=$(addprefix src/,$(SRCS))
 OBJS=$(addprefix obj/,$(notdir $(SRCS:.c=.o)))
 LIBS=
 TARGET=gs.out
+
+ifneq ($(shell uname -s),Darwin)
+	CFLAGS +=  -pthread -D _SYSV
+endif
 
 all: $(TARGET)
 
