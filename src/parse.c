@@ -87,7 +87,7 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 			}
 		} else {
 			if(current == NULL) // mono symbol.
-				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL; else {CHKERROR(gc_ref(&(so->gcInfo))) goto L_END;}
+				if(errorReason = parse_symbol(&so, &ot)) goto L_FAIL; else {if(so != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(so->gcInfo))) goto L_END;}
 			if(ot.tokenKind == TOKEN_PAREN_CLOSE) {
 				PARSE_POP
 				while(current->quote) PARSE_POP // when '( ...
@@ -110,7 +110,6 @@ parse(schemeObject_t ** out, tokenizer_t * input) {
 
 L_END:
 	if(envStack != NULL) return ERR_PARSE_TOO_MUCH_PAREN_OPEN; // missing ), too much (((
-	if (so == NULL) return ERR_PARSE_NO_INPUT;
 	*out = so;
 	return ERR_SUCCESS;
 

@@ -26,22 +26,21 @@ runner_new(runner_t * outval, scheduler_t * paren) {
 #if _MSC_VER
 gserror_t
 runner_new_spawn(runner_t * outval, scheduler_t * paren, LPTHREAD_START_ROUTINE routine, LPVOID param, LPDWORD id) {
-	outval->parent = paren;
-	outval->garbage = NULL;
+	runner_new(outval, paren);
 	outval->hThread = CreateThread(NULL, 0, routine, param, 0, id);
 	return outval->hThread == NULL ? ERR_ILLEGAL_STATE : ERR_SUCCESS;
 }
 #elif _SYSV
 gserror_t
 runner_new_spawn(runner_t * outval, scheduler_t * paren, void * routine (void *), void * param) {
-	outval->parent = paren;
+	runner_new(outval, paren);
 	if(pthread_create(&(outval->thread), NULL, routine, param) != 0) return ERR_ILLEGAL_STATE;
 	return ERR_SUCCESS;
 }
 #elif _ESP
 gserror_t
 runner_new_spawn(runner_t * outval, scheduler_t * paren, void routine (void *), void * param) {
-	outval->parent = paren;
+	runner_new(outval, paren);
 	if(xTaskCreatePinnedToCore(routine, "RUNNER Thread", 8192, param, 1, &(outval->thread), 1) == pdFAIL) return ERR_ILLEGAL_STATE;
 	return ERR_SUCCESS;	
 }
@@ -229,7 +228,7 @@ gserror_t
 greenthread_spawn(struct machine * self, struct schemeObject * inval) {
 	machine_t * newmachine = (machine_t *)reallocarray(NULL, 1, sizeof(machine_t));
 	if (newmachine == NULL) return ERR_OUT_OF_MEMORY;
-	CHKERROR(gc_ref(&(inval->gcInfo)))
+	if(inval != SCHEME_OBJECT_NILL) CHKERROR(gc_ref(&(inval->gcInfo)))
 	CHKERROR(machine_new(newmachine, self->env))
 	CHKERROR(greenthread_init(newmachine, inval, self->runner->parent))
 	return ERR_SUCCESS;
