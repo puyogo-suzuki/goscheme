@@ -165,6 +165,7 @@ environment_new_global(environment_t * out)
 	CHKERROR(addfunc(out, "m5-accel", 8, schemefunc_esp_accel))
 	CHKERROR(addfunc(out, "m5-gyro", 7, schemefunc_esp_gyro))
 	CHKERROR(addfunc(out, "m5-temp", 7, schemefunc_esp_temp))
+	CHKERROR(addfunc(out, "spawn", 5, builtin_spawn))
 #else
 	CHKERROR(addfunc(out, "sleep", 5, builtin_sleep))
 	CHKERROR(addfunc(out, "display", 7, builtin_display))

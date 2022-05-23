@@ -38,10 +38,23 @@ runner_new_spawn(runner_t * outval, scheduler_t * paren, void * routine (void *)
 	if(pthread_create(&(outval->thread), NULL, routine, param) != 0) return ERR_ILLEGAL_STATE;
 	return ERR_SUCCESS;
 }
+#elif _ESP
+gserror_t
+runner_new_spawn(runner_t * outval, scheduler_t * paren, void routine (void *), void * param) {
+	outval->parent = paren;
+	if(xTaskCreatePinnedToCore(routine, "RUNNER Thread", 8192, param, 1, &(outval->thread), 1) == pdFAIL) return ERR_ILLEGAL_STATE;
+	return ERR_SUCCESS;	
+}
 #endif
 
 void
 runner_terminate(runner_t * self, machine_t * m) {
+#if _ESP
+	TaskHandle_t th = self->thread;
+	free(m);
+	free(self);
+	vTaskDelete(th);
+#else
 	while (true) {
 		machine_t * getNext = scheduler_getNext(self->parent);
 		if (getNext == NULL) {
@@ -61,6 +74,7 @@ runner_terminate(runner_t * self, machine_t * m) {
 #endif
 		// this means return;
 	}
+#endif
 }
 
 #if _MSC_VER || _SYSV
@@ -111,6 +125,24 @@ greenthread_starter(void * arg) {
 		// this means return;
 	}
 }
+#elif _ESP
+typedef struct starter { machine_t * machine; schemeObject_t * func;  } starter_t;
+void
+greenthread_starter(starter_t * arg) {
+	schemeObject_t * obj = NULL;
+	string_t str = {NULL};
+	if (machine_evalforce(arg->machine, arg->machine->env, arg->func, &obj) == ERR_SUCCESS) {
+		if (schemeObject_toString(&str, obj) == ERR_SUCCESS)
+			string_writeLine(stdout, &str);
+		else
+			errorOut("ERROR", "greenthread_starter", "schemeObject_toString failure.");
+		gc_deref_schemeObject(obj);
+	}
+	gc_deref_schemeObject(arg->func);
+	machine_t * m = arg->machine;
+	free(arg);
+	runner_terminate(m->runner, m);
+}
 #endif
 
 gserror_t
@@ -134,6 +166,15 @@ greenthread_init(machine_t * self, schemeObject_t * function, scheduler_t * regi
 
 	makecontext(&(self->uc), (void (*)(void))greenthread_starter, 1, (void*)v);
 	CHKERROR(linkedListAppend_append2(&(registerTo->machines), &self, machine_t *))
+#elif _ESP
+	starter_t * v = (starter_t *)reallocarray(NULL, 1, sizeof(starter_t));
+	if (v == NULL) return ERR_OUT_OF_MEMORY;
+	v->func = function;
+	v->machine = self;
+	runner_t * runner = (runner_t *)reallocarray(NULL, 1, sizeof(runner_t));
+	if (runner == NULL) return ERR_OUT_OF_MEMORY;
+	self->runner = runner;
+	CHKERROR(runner_new_spawn(runner, registerTo, (void (*)(void *))greenthread_starter, (void *)v))
 #endif
 	return ERR_SUCCESS;
 }

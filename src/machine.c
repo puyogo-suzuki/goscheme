@@ -3,6 +3,9 @@
 #include "parse.h"
 #include "io.h"
 #include "common.h"
+#if _ESP
+#include "esp_cpp_ffi.h"
+#endif
 
 gserror_t
 machine_new(machine_t * out, environment_t * env)
@@ -135,8 +138,12 @@ machine_eval(machine_t * self, environment_t * env, schemeObject_t * val, evalua
 	switch (val->kind) {
 	case SCHEME_OBJECT_SYMBOL:
 		if (!environment_getObject(env, &(out->value.evaluatedValue), &(val->value.symValue))) {
+#if _ESP
+			serialOut("[ERROR] machine_eval: Not found symbol: ");
+#else
 			fprintf(stderr, "[ERROR] machine_eval: Not found symbol: ");
-			string_writeLine(stdout, &(val->value.symValue));
+#endif
+			string_writeLine(stderr, &(val->value.symValue));
 			CHKERROR(gc_deref_schemeObject(val))
 			return ERR_EVAL_NOT_FOUND_SYMBOL;
 		}

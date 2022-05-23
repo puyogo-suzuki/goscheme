@@ -534,8 +534,8 @@ ONE_ARGUMENT_FUNC(builtin_sleep, "sleep", { \
     }\
     CHKERROR(greenthread_sleep(self, arg0->value.numValue))\
 })
-
-#if _MSC_VER || _SYSV
+#endif
+#if _MSC_VER || _SYSV || _ESP
 gserror_t
 builtin_spawn(machine_t * self, environment_t * env, schemeObject_t * val, evaluationResult_t * out) {
     if (!schemeObject_isList(val)) {
@@ -547,6 +547,4 @@ builtin_spawn(machine_t * self, environment_t * env, schemeObject_t * val, evalu
     CHKERROR(greenthread_spawn(self, val))
     return ERR_SUCCESS;
 }
-
-#endif
 #endif

@@ -9,6 +9,10 @@
 #if _SYSV
 #include <pthread.h>
 #endif
+#if _ESP
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#endif
 
 struct schemeObject;
 struct machine;
@@ -20,6 +24,8 @@ typedef struct runner {
 	HANDLE hThread;
 #elif _SYSV
 	pthread_t thread;
+#elif _ESP
+	TaskHandle_t thread;
 #endif
 	struct machine * garbage;
 } runner_t;
@@ -42,6 +48,10 @@ runner_new_spawn(runner_t * outval, scheduler_t * paren, LPTHREAD_START_ROUTINE 
 #if _SYSV
 gserror_t
 runner_new_spawn(runner_t * outval, scheduler_t * paren, void * routine (void *), void * param);
+#endif
+#if _ESP
+gserror_t
+runner_new_spawn(runner_t * outval, scheduler_t * paren, void routine (void *), void * param);
 #endif
 
 gserror_t
